@@ -7,7 +7,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import javax.management.relation.Role;
+import com.In_need.inNeedApp.constant.Role;
+
 import java.util.Objects;
 
 @Data
@@ -42,7 +43,7 @@ public class Users {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "role", nullable = false)
-    private Role role;
+    private  Role role;
 
     @Override
     public boolean equals(Object o) {
