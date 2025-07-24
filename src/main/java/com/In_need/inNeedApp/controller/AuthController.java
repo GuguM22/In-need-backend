@@ -79,7 +79,7 @@ public class AuthController {
 
         Users savedUser = userRepository.save(user);
 
-        String link = "http://localhost:7474/auth/verify?token=" + savedUser.getVerificationToken();
+        String link = "http://localhost:5050/auth/verify?token=" + savedUser.getVerificationToken();
         emailService.sendVerificationEmail(savedUser.getEmail(), link);
 
         return ResponseEntity.ok(Map.of("message", "User registered successfully. Please verify your email."));
@@ -156,7 +156,7 @@ public class AuthController {
         user.setResetToken(token);
         userRepository.save(user);
 
-        String resetLink = "http://localhost:7474/auth/reset-password?token=" + token;
+        String resetLink = "http://localhost:5050/auth/reset-password?token=" + token;
         emailService.sendVerificationEmail(user.getEmail(), resetLink); // Reuse email sender
 
         return ResponseEntity.ok(Map.of("message", "Reset link sent to your email"));
