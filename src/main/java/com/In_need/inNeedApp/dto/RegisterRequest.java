@@ -11,10 +11,11 @@ public class RegisterRequest {
     @Size(min = 3, max = 20, message = "Username must be 3-20 characters")
     private String username;
 
-    @NotBlank(message = "Email is required")
+    @NotNull(message = "Role is required")
+    private Role role;
+
     @Email(message = "Invalid email format")
     private String email;
-
     @NotBlank(message = "Password is required")
     @Size(min = 8, max = 15, message = "Password must be 8-15 characters")
     @Pattern(
