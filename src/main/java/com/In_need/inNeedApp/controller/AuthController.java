@@ -1,9 +1,6 @@
 package com.In_need.inNeedApp.controller;
 
-import com.In_need.inNeedApp.dto.ForgotPasswordRequest;
-import com.In_need.inNeedApp.dto.RegisterRequest;
-import com.In_need.inNeedApp.dto.ResetPasswordRequest;
-import com.In_need.inNeedApp.dto.SignInRequest;
+import com.In_need.inNeedApp.dto.*;
 import com.In_need.inNeedApp.model.Users;
 import com.In_need.inNeedApp.repository.UserRepository;
 import com.In_need.inNeedApp.services.EmailService;
@@ -113,10 +110,10 @@ public class AuthController {
 
             String token = jwtUtil.generateToken(authentication.getName(), authentication.getAuthorities());
 
-            return ResponseEntity.ok(Map.of(
-                    "token", token,
-                    "email", authentication.getName()
-            ));
+
+            return ResponseEntity.ok(new UserLoginResponse(token, user.getRole().name(), user.getEmail()));
+
+
 
         } catch (AuthenticationException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
