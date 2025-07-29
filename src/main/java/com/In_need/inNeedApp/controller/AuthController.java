@@ -65,16 +65,21 @@ public class AuthController {
             return ResponseEntity.badRequest().body(Map.of("error", "Email already exists"));
         }
 
+        if (request.getUsername() == null || request.getUsername().isBlank()) {
+            return ResponseEntity.badRequest().body(Map.of("error", "Username must not be empty"));
+        }
+
         // Map DTO to Entity
         Users user = new Users();
         user.setEmail(request.getEmail().toLowerCase());
         user.setPassword(passwordEncoder.encode(request.getPassword()));
-        user.setName(request.getUsername() );
+        user.setUsername(request.getUsername());
         user.setRole(request.getRole());
         user.setVerified(false);
         user.setVerificationToken(UUID.randomUUID().toString());
 
         Users savedUser = userRepository.save(user);
+
 
         String link = "http://localhost:5050/auth/verify?token=" + savedUser.getVerificationToken();
         emailService.sendVerificationEmail(savedUser.getEmail(), link);
