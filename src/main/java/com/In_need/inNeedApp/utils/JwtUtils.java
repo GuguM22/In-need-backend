@@ -20,7 +20,7 @@ public class JwtUtils {
     private String secret;
 
     public String generateToken(String email, Collection<? extends GrantedAuthority> authorities) {
-        long expirationMs = 86400000; // 1 day
+        long expirationMs = 86400000;
         SecretKey key = Keys.hmacShaKeyFor(secret.getBytes());
 
         return Jwts.builder()

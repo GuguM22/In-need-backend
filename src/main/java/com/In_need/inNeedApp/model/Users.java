@@ -29,8 +29,8 @@ public class Users {
     @JsonIgnore
     private String password;
 
-    @Column(name = "name")
-    private String name;
+    @Column(name = "username")
+    private String username;
 
     @Column(name = "verification_token")
     private String verificationToken;
@@ -63,7 +63,7 @@ public class Users {
         return "Users{" +
                 "id=" + id +
                 ", email='" + email + " " +
-        ", name='" + name + " " +
+        ", name='" + username + " " +
         ", verified=" + verified +
                 ", role=" + role +
                 '}';
