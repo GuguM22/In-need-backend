@@ -56,7 +56,12 @@ public class CorsConfig {
                     .cors(Customizer.withDefaults())
                     .csrf(AbstractHttpConfigurer::disable)
                     .authorizeHttpRequests(auth -> auth
-                            .requestMatchers("/auth/register", "/auth/login", "/auth/verify", "/auth/forgot-password", "auth/reset-password").permitAll()
+                            .requestMatchers(
+                                    "/auth/register",
+                                    "/auth/login",
+                                    "/auth/verify",
+                                    "/auth/forgot-password",
+                                    "auth/reset-password").permitAll()
                             .requestMatchers("/ADMIN/**").hasRole("ADMIN")
                             .requestMatchers("/ORGANIZATION/**").hasRole("ORGANIZATION")
                             .requestMatchers("/INDIVIDUAL/**").hasRole("INDIVIDUAL")

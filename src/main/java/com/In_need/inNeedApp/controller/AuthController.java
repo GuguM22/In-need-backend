@@ -21,9 +21,9 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
-@CrossOrigin(origins = "http://localhost/4200")
+@CrossOrigin(origins = "*")
 @RestController
-@RequestMapping("/auth") // All auth-related endpoints
+@RequestMapping("/auth")
 public class AuthController {
 
 
@@ -141,6 +141,7 @@ public class AuthController {
         }
     }
 
+
     @PostMapping("/forgot-password")
     public ResponseEntity<?> forgotPassword(@RequestBody ForgotPasswordRequest request) {
         Optional<Users> userOpt = userRepository.findByEmailIgnoreCase(request.getEmail());
@@ -153,7 +154,7 @@ public class AuthController {
         user.setResetToken(token);
         userRepository.save(user);
 
-        String resetLink = "http://localhost:5050/auth/reset-password?token=" + token;
+        String resetLink = "http://localhost:4200/auth/reset-password?token=" + token;
         emailService.sendVerificationEmail(user.getEmail(), resetLink); // Reuse email sender
 
         return ResponseEntity.ok(Map.of("message", "Reset link sent to your email"));
