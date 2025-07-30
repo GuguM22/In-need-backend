@@ -66,6 +66,7 @@ public class CorsConfig {
                             .requestMatchers("/ORGANIZATION/**").hasRole("ORGANIZATION")
                             .requestMatchers("/INDIVIDUAL/**").hasRole("INDIVIDUAL")
                             .requestMatchers("/SPONSORS/**").hasAnyRole("SPONSORS", "ADMIN")
+                            .requestMatchers("/auth/donations/**").hasAnyRole("SPONSORS")
                             .anyRequest().authenticated()
                     )
                     .sessionManagement(session -> session
