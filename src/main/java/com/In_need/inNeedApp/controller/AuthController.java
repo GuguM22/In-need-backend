@@ -17,9 +17,13 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import java.net.URLEncoder;
 
 @CrossOrigin(origins = "*")
 @RestController
@@ -80,8 +84,8 @@ public class AuthController {
 
         Users savedUser = userRepository.save(user);
 
-
-        String link = "http://10.100.3.53:5050/auth/verify?token=" + savedUser.getVerificationToken();
+        String encodedToken = URLEncoder.encode(savedUser.getVerificationToken(), StandardCharsets.UTF_8);
+        String link = "http://10.100.3.53:5050/auth/verify?token=" + encodedToken;
         emailService.sendVerificationEmail(savedUser.getEmail(), link);
 
         return ResponseEntity.ok(Map.of("message", "User registered successfully. Please verify your email."));
@@ -131,10 +135,19 @@ public class AuthController {
 
     @GetMapping("/verify")
     public ResponseEntity<?> verifyUser(@RequestParam("token") String token) {
-        Optional<Users> optionalUser = userRepository.findByVerificationToken(token);
+        String decodedToken = URLDecoder.decode(token, StandardCharsets.UTF_8);
+        System.out.println("Received token: " + token);
+        System.out.println("Decoded token: " + decodedToken);
+
+        Optional<Users> optionalUser = userRepository.findByVerificationToken(decodedToken);
 
         if (optionalUser.isPresent()) {
             Users user = optionalUser.get();
+
+            if (user.isVerified()) {
+                return ResponseEntity.ok(Map.of("message", "Email is already verified"));
+            }
+
             user.setVerified(true);
             user.setVerificationToken(null);
             userRepository.save(user);
@@ -144,7 +157,9 @@ public class AuthController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(Map.of("error", "Invalid or expired token"));
         }
+
     }
+
 
 
     @PostMapping("/forgot-password")
