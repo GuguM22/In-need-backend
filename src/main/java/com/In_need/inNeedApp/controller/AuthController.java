@@ -81,7 +81,7 @@ public class AuthController {
         Users savedUser = userRepository.save(user);
 
 
-        String link = "http://localhost:5050/auth/verify?token=" + savedUser.getVerificationToken();
+        String link = "http://10.100.3.53:5050/auth/verify?token=" + savedUser.getVerificationToken();
         emailService.sendVerificationEmail(savedUser.getEmail(), link);
 
         return ResponseEntity.ok(Map.of("message", "User registered successfully. Please verify your email."));
