@@ -25,7 +25,7 @@ import java.util.Optional;
 import java.util.UUID;
 import java.net.URLEncoder;
 
-@CrossOrigin(origins = "*")
+@CrossOrigin(origins =  "http://10.100.3.53:4200")
 @RestController
 @RequestMapping("/auth")
 public class AuthController {
@@ -160,8 +160,6 @@ public class AuthController {
 
     }
 
-
-
     @PostMapping("/forgot-password")
     public ResponseEntity<?> forgotPassword(@RequestBody ForgotPasswordRequest request) {
         Optional<Users> userOpt = userRepository.findByEmailIgnoreCase(request.getEmail());
@@ -174,7 +172,7 @@ public class AuthController {
         user.setResetToken(token);
         userRepository.save(user);
 
-        String resetLink = "http://localhost:4200/auth/reset-password?token=" + token;
+        String resetLink = "http://10.100.3.53:4200/auth/reset-password?token=" + token;
         emailService.sendVerificationEmail(user.getEmail(), resetLink); // Reuse email sender
 
         return ResponseEntity.ok(Map.of("message", "Reset link sent to your email"));
