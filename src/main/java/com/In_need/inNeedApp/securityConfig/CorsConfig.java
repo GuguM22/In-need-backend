@@ -49,36 +49,34 @@ public class CorsConfig {
 //            };
 //        }
 
-        @Bean
-        public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-            http
-                    .cors(Customizer.withDefaults())
-                    .cors(Customizer.withDefaults())
-                    .csrf(AbstractHttpConfigurer::disable)
-                    .authorizeHttpRequests(auth -> auth
-                            .requestMatchers(
-                                    "/auth/register",
-                                    "/auth/login",
-                                    "/auth/verify",
-                                    "/auth/forgot-password",
-                                    "auth/reset-password").permitAll()
-                            .requestMatchers("/ADMIN/**").hasRole("ADMIN")
-                            .requestMatchers("/ORGANIZATION/**").hasRole("ORGANIZATION")
-                            .requestMatchers("/INDIVIDUAL/**").hasRole("INDIVIDUAL")
-                            .requestMatchers("/SPONSORS/**").hasAnyRole("SPONSORS", "ADMIN")
-                            .requestMatchers("/auth/donations/**").hasAnyRole("SPONSORS")
-                            .anyRequest().authenticated()
-                    )
-                    .sessionManagement(session -> session
-                            .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-                    )
-                    .addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);
+    @Bean
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+        http
+                .cors(Customizer.withDefaults())  // Only once
+                .csrf(AbstractHttpConfigurer::disable)
+                .authorizeHttpRequests(auth -> auth
+                        .requestMatchers(
+                                "/auth/register",
+                                "/auth/login",
+                                "/auth/verify",
+                                "/auth/forgot-password",
+                                "/auth/reset-password"
+                        ).permitAll()
+                        .requestMatchers("/ADMIN/**").hasRole("ADMIN")
+                        .requestMatchers("/ORGANIZATION/**").hasRole("ORGANIZATION")
+                        .requestMatchers("/INDIVIDUAL/**").hasRole("INDIVIDUAL")
+                        .requestMatchers("/SPONSORS/**").hasAnyRole("SPONSORS", "ADMIN")
+                        .requestMatchers("/auth/donations/**").hasAnyRole("SPONSORS")
+                        .anyRequest().authenticated()
+                )
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);
+
+        return http.build();
+    }
 
 
-            return http.build();
-        }
-
-        @Bean
+    @Bean
         public AuthenticationManager authenticationManager(HttpSecurity http) throws Exception {
             AuthenticationManagerBuilder authBuilder = http.getSharedObject(AuthenticationManagerBuilder.class);
             authBuilder.userDetailsService(customUserDetailsService)
@@ -116,7 +114,8 @@ public class CorsConfig {
             // Gives information about which origins (frontend URLs) can send cross-origin requests to your backend.
             // Your Angular development server, typically located at http://localhost:4200, is the only permitted IP address.
             // We will block requests from other sources.
-            configuration.setAllowedOrigins(List.of("http://localhost:4200"));
+          // configuration.addAllowedOriginPattern("http://localhost:4200");
+            configuration.addAllowedOriginPattern("http://10.100.3.53:4200");
             // Indicates which HTTP methods from the permitted origins are permitted.
             //  Requests such as GET, POST, PUT, DELETE, and OPTIONS are supported.
             // Requests made with methods not on this list will be rejected.
