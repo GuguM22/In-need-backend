@@ -3,6 +3,7 @@ package com.In_need.inNeedApp.model;
 import com.In_need.inNeedApp.constant.DonationFrequency;
 import com.In_need.inNeedApp.constant.DonationType;
 import com.In_need.inNeedApp.constant.LogisticPreference;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -51,5 +52,6 @@ public class Donation {
     private String donorEmail;
 
     @Column(name = "createdAt")
+    @JsonFormat(pattern = "HH:mm")
     private LocalDateTime createdAt;
 }
