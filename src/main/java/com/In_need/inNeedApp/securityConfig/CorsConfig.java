@@ -114,7 +114,7 @@ public class CorsConfig {
             // Gives information about which origins (frontend URLs) can send cross-origin requests to your backend.
             // Your Angular development server, typically located at http://localhost:4200, is the only permitted IP address.
             // We will block requests from other sources.
-          // configuration.addAllowedOriginPattern("http://localhost:4200");
+            configuration.addAllowedOriginPattern("http://localhost:4200");
             configuration.addAllowedOriginPattern("http://10.100.3.53:4200");
             // Indicates which HTTP methods from the permitted origins are permitted.
             //  Requests such as GET, POST, PUT, DELETE, and OPTIONS are supported.
