@@ -4,7 +4,11 @@ import com.In_need.inNeedApp.dto.*;
 import com.In_need.inNeedApp.model.Users;
 import com.In_need.inNeedApp.repository.UserRepository;
 import com.In_need.inNeedApp.services.EmailService;
+import com.In_need.inNeedApp.services.TokenBlacklistService;
 import com.In_need.inNeedApp.utils.JwtUtils;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -20,6 +24,7 @@ import org.springframework.web.bind.annotation.*;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
+import java.util.Date;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
@@ -36,18 +41,20 @@ public class AuthController {
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
     private final JwtUtils jwtUtil;
+    private final TokenBlacklistService blacklistService;
     private  final EmailService emailService;
 
     @Autowired
     public  AuthController(AuthenticationManager authenticationManager,
                            JwtUtils jwtUtil,
                            PasswordEncoder passwordEncoder,
-                           UserRepository userRepository, EmailService emailService) {
+                           UserRepository userRepository, EmailService emailService, TokenBlacklistService blacklistService) {
         this.authenticationManager = authenticationManager;
         this.jwtUtil = jwtUtil;
         this.passwordEncoder = passwordEncoder;
         this.userRepository = userRepository;
         this.emailService = emailService;
+        this.blacklistService = blacklistService;
     }
 
     @PostMapping("/register")
@@ -197,6 +204,24 @@ public class AuthController {
         userRepository.save(user);
 
         return ResponseEntity.ok(Map.of("message", "Password has been reset successfully"));
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<?> logout(HttpServletRequest request) {
+        String token = extractTokenFromRequest(request);
+        if (token != null) {
+            Date exp = jwtUtil.extractExpiration(token); // new method
+            blacklistService.blacklist(token, exp.getTime());
+        }
+        return ResponseEntity.ok().body(Map.of("message", "Logout successful"));
+    }
+
+    private String extractTokenFromRequest(HttpServletRequest request) {
+        String bearer = request.getHeader("Authorization");
+        if (bearer != null && bearer.startsWith("Bearer ")) {
+            return bearer.substring(7);
+        }
+        return null;
     }
 
 }

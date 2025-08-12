@@ -1,6 +1,7 @@
 package com.In_need.inNeedApp.securityConfig;
 
 import com.In_need.inNeedApp.services.CustomUserDetailsService;
+import com.In_need.inNeedApp.services.TokenBlacklistService;
 import com.In_need.inNeedApp.utils.JwtAuthenticationFilter;
 import com.In_need.inNeedApp.utils.JwtUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -50,9 +51,9 @@ public class CorsConfig {
 //        }
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain securityFilterChain(HttpSecurity http, JwtAuthenticationFilter jwtAuthenticationFilter) throws Exception {
         http
-                .cors(Customizer.withDefaults())  // Only once
+                .cors(Customizer.withDefaults())
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
@@ -60,7 +61,8 @@ public class CorsConfig {
                                 "/auth/login",
                                 "/auth/verify",
                                 "/auth/forgot-password",
-                                "/auth/reset-password"
+                                "/auth/reset-password",
+                                "/auth/logout"
                         ).permitAll()
                         .requestMatchers("/ADMIN/**").hasRole("ADMIN")
                         .requestMatchers("/ORGANIZATION/**").hasRole("ORGANIZATION")
@@ -70,10 +72,11 @@ public class CorsConfig {
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);
+                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
+
 
 
     @Bean
@@ -84,23 +87,24 @@ public class CorsConfig {
             return authBuilder.build();
         }
 
-
-
         @Bean
         public UserDetailsService userDetailsService(CustomUserDetailsService authService) {
             return authService;
         }
-        @Bean
-        public JwtAuthenticationFilter jwtAuthenticationFilter() {
-            return new JwtAuthenticationFilter(jwtUtil());
-        }
+    @Bean
+    public JwtAuthenticationFilter jwtAuthenticationFilter(JwtUtils jwtUtil, TokenBlacklistService tokenBlacklistService) {
+        return new JwtAuthenticationFilter(jwtUtil, tokenBlacklistService);
+    }
 
-        @Bean
-        public JwtUtils jwtUtil() {
-            return new JwtUtils();
-        }
+    @Bean
+    public JwtUtils jwtUtil() {
+        return new JwtUtils();
+    }
 
-
+    @Bean
+    public TokenBlacklistService tokenBlacklistService() {
+        return new TokenBlacklistService();
+    }
 
         @Bean
         public PasswordEncoder passwordEncoder() {

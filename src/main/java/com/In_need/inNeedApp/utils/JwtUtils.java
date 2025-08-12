@@ -57,4 +57,16 @@ public class JwtUtils {
             return false;
         }
     }
+
+    // inside JwtUtils
+    public Date extractExpiration(String token) {
+        SecretKey key = Keys.hmacShaKeyFor(secret.getBytes());
+        Claims claims = Jwts.parserBuilder()
+                .setSigningKey(key)
+                .build()
+                .parseClaimsJws(token)
+                .getBody();
+        return claims.getExpiration();
+    }
+
 }
