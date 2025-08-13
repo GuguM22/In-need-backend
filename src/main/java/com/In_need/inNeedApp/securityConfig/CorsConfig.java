@@ -62,8 +62,11 @@ public class CorsConfig {
                                 "/auth/verify",
                                 "/auth/forgot-password",
                                 "/auth/reset-password",
-                                "/auth/logout"
+                                "/auth/logout",
+                                "/api/verify/verification",
+                                "/api/verify/upload"
                         ).permitAll()
+
                         .requestMatchers("/ADMIN/**").hasRole("ADMIN")
                         .requestMatchers("/ORGANIZATION/**").hasRole("ORGANIZATION")
                         .requestMatchers("/INDIVIDUAL/**").hasRole("INDIVIDUAL")
@@ -119,7 +122,7 @@ public class CorsConfig {
             // Your Angular development server, typically located at http://localhost:4200, is the only permitted IP address.
             // We will block requests from other sources.
             configuration.addAllowedOriginPattern("http://localhost:4200");
-            configuration.addAllowedOriginPattern("http://10.100.3.53:4200");
+            //configuration.addAllowedOriginPattern("http://10.100.3.53:4200");
             // Indicates which HTTP methods from the permitted origins are permitted.
             //  Requests such as GET, POST, PUT, DELETE, and OPTIONS are supported.
             // Requests made with methods not on this list will be rejected.

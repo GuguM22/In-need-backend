@@ -30,7 +30,7 @@ import java.util.Optional;
 import java.util.UUID;
 import java.net.URLEncoder;
 
-@CrossOrigin(origins =  "http://10.100.3.53:4200")
+@CrossOrigin(origins = "http://localhost:4200")
 @RestController
 @RequestMapping("/auth")
 public class AuthController {
