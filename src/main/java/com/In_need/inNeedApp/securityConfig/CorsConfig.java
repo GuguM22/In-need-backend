@@ -59,7 +59,7 @@ public class CorsConfig {
                         .requestMatchers(
                                 "/auth/register",
                                 "/auth/login",
-                                "/auth/verify",
+                                /*"/auth/verify",*/
                                 "/auth/forgot-password",
                                 "/auth/reset-password",
                                 "/auth/logout",

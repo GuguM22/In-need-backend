@@ -22,7 +22,7 @@ public class Users {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "email", unique = true, nullable = false)
+    @Column(name = "email", unique = false, nullable = false)
     private String email;
 
     @Column(name = "password", nullable = false)
@@ -32,11 +32,11 @@ public class Users {
     @Column(name = "username")
     private String username;
 
-    @Column(name = "verification_token")
-    private String verificationToken;
+//    @Column(name = "verification_token")
+//    private String verificationToken;
 
-    @Column(name = "verified")
-    private boolean verified = false;
+   /* @Column(name = "verified")
+    private boolean verified = false; */
 
     @Column(name = "reset_token")
     private String resetToken;
@@ -64,7 +64,7 @@ public class Users {
                 "id=" + id +
                 ", email='" + email + " " +
         ", name='" + username + " " +
-        ", verified=" + verified +
+        ", verified=" + //verified* +
                 ", role=" + role +
                 '}';
     }
