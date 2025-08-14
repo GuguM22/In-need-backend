@@ -4,7 +4,11 @@ import com.In_need.inNeedApp.dto.*;
 import com.In_need.inNeedApp.model.Users;
 import com.In_need.inNeedApp.repository.UserRepository;
 import com.In_need.inNeedApp.services.EmailService;
+import com.In_need.inNeedApp.services.TokenBlacklistService;
 import com.In_need.inNeedApp.utils.JwtUtils;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -20,12 +24,13 @@ import org.springframework.web.bind.annotation.*;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
+import java.util.Date;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import java.net.URLEncoder;
 
-@CrossOrigin(origins =  "http://10.100.3.53:4200")
+@CrossOrigin(origins = "http://localhost:4200")
 @RestController
 @RequestMapping("/auth")
 public class AuthController {
@@ -36,18 +41,20 @@ public class AuthController {
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
     private final JwtUtils jwtUtil;
+    private final TokenBlacklistService blacklistService;
     private  final EmailService emailService;
 
     @Autowired
     public  AuthController(AuthenticationManager authenticationManager,
                            JwtUtils jwtUtil,
                            PasswordEncoder passwordEncoder,
-                           UserRepository userRepository, EmailService emailService) {
+                           UserRepository userRepository, EmailService emailService, TokenBlacklistService blacklistService) {
         this.authenticationManager = authenticationManager;
         this.jwtUtil = jwtUtil;
         this.passwordEncoder = passwordEncoder;
         this.userRepository = userRepository;
         this.emailService = emailService;
+        this.blacklistService = blacklistService;
     }
 
     @PostMapping("/register")
@@ -79,16 +86,16 @@ public class AuthController {
         user.setPassword(passwordEncoder.encode(request.getPassword()));
         user.setUsername(request.getUsername());
         user.setRole(request.getRole());
-        user.setVerified(false);
-        user.setVerificationToken(UUID.randomUUID().toString());
+//        user.setVerified(false);
+//        user.setVerificationToken(UUID.randomUUID().toString());
 
         Users savedUser = userRepository.save(user);
 
-        String encodedToken = URLEncoder.encode(savedUser.getVerificationToken(), StandardCharsets.UTF_8);
-        String link = "http://10.100.3.53:5050/auth/verify?token=" + encodedToken;
-        emailService.sendVerificationEmail(savedUser.getEmail(), link);
+//        String encodedToken = URLEncoder.encode(savedUser.getVerificationToken(), StandardCharsets.UTF_8);
+       // String link = "http://10.100.3.53:5050/auth/verify?token=" + encodedToken;
+       // emailService.sendVerificationEmail(savedUser.getEmail(), link);
 
-        return ResponseEntity.ok(Map.of("message", "User registered successfully. Please verify your email."));
+        return ResponseEntity.ok(Map.of("message", "User registered successfully"));
     }
 
     @PostMapping("/login")
@@ -105,10 +112,10 @@ public class AuthController {
             }
 
             Users user = optionalUser.get();
-            if (!user.isVerified()) {
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                        .body(Map.of("error", "Please verify your email before logging in"));
-            }
+//            if (!user.isVerified()) {
+//                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+//                        .body(Map.of("error", "Please verify your email before logging in"));
+//            }
 
             // Authenticate
             Authentication authentication = authenticationManager.authenticate(
@@ -133,7 +140,7 @@ public class AuthController {
         }
     }
 
-    @GetMapping("/verify")
+   /* @GetMapping("/verify")
     public ResponseEntity<?> verifyUser(@RequestParam("token") String token) {
         String decodedToken = URLDecoder.decode(token, StandardCharsets.UTF_8);
         System.out.println("Received token: " + token);
@@ -158,7 +165,7 @@ public class AuthController {
                     .body(Map.of("error", "Invalid or expired token"));
         }
 
-    }
+    }*/
 
     @PostMapping("/forgot-password")
     public ResponseEntity<?> forgotPassword(@RequestBody ForgotPasswordRequest request) {
@@ -172,7 +179,7 @@ public class AuthController {
         user.setResetToken(token);
         userRepository.save(user);
 
-        String resetLink = "http://10.100.3.53:4200/auth/reset-password?token=" + token;
+        String resetLink = "http://localhost:4200/auth/reset-password?token=" + token;
         emailService.sendVerificationEmail(user.getEmail(), resetLink); // Reuse email sender
 
         return ResponseEntity.ok(Map.of("message", "Reset link sent to your email"));
@@ -197,6 +204,24 @@ public class AuthController {
         userRepository.save(user);
 
         return ResponseEntity.ok(Map.of("message", "Password has been reset successfully"));
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<?> logout(HttpServletRequest request) {
+        String token = extractTokenFromRequest(request);
+        if (token != null) {
+            Date exp = jwtUtil.extractExpiration(token); // new method
+            blacklistService.blacklist(token, exp.getTime());
+        }
+        return ResponseEntity.ok().body(Map.of("message", "Logout successful"));
+    }
+
+    private String extractTokenFromRequest(HttpServletRequest request) {
+        String bearer = request.getHeader("Authorization");
+        if (bearer != null && bearer.startsWith("Bearer ")) {
+            return bearer.substring(7);
+        }
+        return null;
     }
 
 }

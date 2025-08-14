@@ -1,6 +1,7 @@
 package com.In_need.inNeedApp.securityConfig;
 
 import com.In_need.inNeedApp.services.CustomUserDetailsService;
+import com.In_need.inNeedApp.services.TokenBlacklistService;
 import com.In_need.inNeedApp.utils.JwtAuthenticationFilter;
 import com.In_need.inNeedApp.utils.JwtUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -50,18 +51,22 @@ public class CorsConfig {
 //        }
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain securityFilterChain(HttpSecurity http, JwtAuthenticationFilter jwtAuthenticationFilter) throws Exception {
         http
-                .cors(Customizer.withDefaults())  // Only once
+                .cors(Customizer.withDefaults())
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
                                 "/auth/register",
                                 "/auth/login",
-                                "/auth/verify",
+                                /*"/auth/verify",*/
                                 "/auth/forgot-password",
-                                "/auth/reset-password"
+                                "/auth/reset-password",
+                                "/auth/logout",
+                                "/api/verify/verification",
+                                "/api/verify/upload"
                         ).permitAll()
+
                         .requestMatchers("/ADMIN/**").hasRole("ADMIN")
                         .requestMatchers("/ORGANIZATION/**").hasRole("ORGANIZATION")
                         .requestMatchers("/INDIVIDUAL/**").hasRole("INDIVIDUAL")
@@ -70,10 +75,11 @@ public class CorsConfig {
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);
+                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
+
 
 
     @Bean
@@ -84,23 +90,24 @@ public class CorsConfig {
             return authBuilder.build();
         }
 
-
-
         @Bean
         public UserDetailsService userDetailsService(CustomUserDetailsService authService) {
             return authService;
         }
-        @Bean
-        public JwtAuthenticationFilter jwtAuthenticationFilter() {
-            return new JwtAuthenticationFilter(jwtUtil());
-        }
+    @Bean
+    public JwtAuthenticationFilter jwtAuthenticationFilter(JwtUtils jwtUtil, TokenBlacklistService tokenBlacklistService) {
+        return new JwtAuthenticationFilter(jwtUtil, tokenBlacklistService);
+    }
 
-        @Bean
-        public JwtUtils jwtUtil() {
-            return new JwtUtils();
-        }
+    @Bean
+    public JwtUtils jwtUtil() {
+        return new JwtUtils();
+    }
 
-
+    @Bean
+    public TokenBlacklistService tokenBlacklistService() {
+        return new TokenBlacklistService();
+    }
 
         @Bean
         public PasswordEncoder passwordEncoder() {
@@ -115,7 +122,7 @@ public class CorsConfig {
             // Your Angular development server, typically located at http://localhost:4200, is the only permitted IP address.
             // We will block requests from other sources.
             configuration.addAllowedOriginPattern("http://localhost:4200");
-            configuration.addAllowedOriginPattern("http://10.100.3.53:4200");
+            //configuration.addAllowedOriginPattern("http://10.100.3.53:4200");
             // Indicates which HTTP methods from the permitted origins are permitted.
             //  Requests such as GET, POST, PUT, DELETE, and OPTIONS are supported.
             // Requests made with methods not on this list will be rejected.

@@ -29,9 +29,9 @@ public class CustomUserDetailsService implements UserDetailsService {
             Users user = userRepository. findByEmailIgnoreCase(username)
                     .orElseThrow(() -> new UsernameNotFoundException("User not found: " + username));
 
-            if (!user.isVerified()) {
-                throw new RuntimeException("Please verify your email before logging in.");
-            }
+//            if (!user.isVerified()) {
+//                throw new RuntimeException("Please verify your email before logging in.");
+//            }
 
             return new org.springframework.security.core.userdetails.User(
                     user.getEmail(),
