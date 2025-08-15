@@ -1,9 +1,12 @@
 package com.In_need.inNeedApp.controller;
 
+import com.In_need.inNeedApp.constant.Status;
 import com.In_need.inNeedApp.dto.VerificationRequest;
+import com.In_need.inNeedApp.dto.VerificationResponse;
 import com.In_need.inNeedApp.model.Documents;
 import com.In_need.inNeedApp.model.Verification;
 import com.In_need.inNeedApp.repository.VerificationRepository;
+import com.In_need.inNeedApp.services.VerificationService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -17,12 +20,13 @@ import java.util.*;
 @RequestMapping("/api/verify")
 @CrossOrigin(origins = "http://localhost:4200")
 public class VerificationController {
-
     private final VerificationRepository verificationRepository;
+    private final VerificationService verificationService;
 
     @Autowired
-    public VerificationController(VerificationRepository verificationRepository) {
+    public VerificationController(VerificationRepository verificationRepository, VerificationService verificationService) {
         this.verificationRepository = verificationRepository;
+        this.verificationService = verificationService;
     }
 
     @PostMapping("/verification")
@@ -113,5 +117,13 @@ public ResponseEntity<Map<String, Object>> uploadFiles(
 
     return ResponseEntity.ok(response);
 }
+
+    @GetMapping("/verifications/pending")
+    public ResponseEntity<List<VerificationResponse>> getPendingVerifications() {
+        List<VerificationResponse> pending = verificationService.getAllByStatus(Status.PENDING);
+        return ResponseEntity.ok(pending);
+    }
+
+
 
 }
