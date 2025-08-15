@@ -56,29 +56,39 @@ public class CorsConfig {
                 .cors(Customizer.withDefaults())
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
+                        // Public endpoints
                         .requestMatchers(
                                 "/auth/register",
                                 "/auth/login",
-                                /*"/auth/verify",*/
                                 "/auth/forgot-password",
                                 "/auth/reset-password",
                                 "/auth/logout",
                                 "/api/verify/verification",
-                                "/api/verify/upload"
+                                "/api/verify/upload",
+                                "/api/individual-requests"   // exact match
+                            // allow all subpaths
+
                         ).permitAll()
 
+                        // Role-based endpoints
                         .requestMatchers("/ADMIN/**").hasRole("ADMIN")
-                        .requestMatchers("/ORGANIZATION/**").hasRole("ORGANIZATION")
+//                        .requestMatchers("/ORGANIZATION/**").hasRole("ORGANIZATION")
                         .requestMatchers("/INDIVIDUAL/**").hasRole("INDIVIDUAL")
                         .requestMatchers("/SPONSORS/**").hasAnyRole("SPONSORS", "ADMIN")
                         .requestMatchers("/auth/donations/**").hasAnyRole("SPONSORS")
+
+                        // Everything else requires authentication
                         .anyRequest().authenticated()
                 )
-                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+                // Make sure JWT filter is only applied after public endpoints are bypassed
+                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
+                .sessionManagement(session -> session
+                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                );
 
         return http.build();
     }
+
 
 
 
