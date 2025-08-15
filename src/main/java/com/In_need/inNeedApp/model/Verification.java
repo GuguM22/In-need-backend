@@ -25,6 +25,10 @@ public class Verification {
     @Column(name = "website")
     private String website;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id")
+    private Users user;
+
     @OneToMany(mappedBy = "verification", fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Documents> documents = new ArrayList<>();
 

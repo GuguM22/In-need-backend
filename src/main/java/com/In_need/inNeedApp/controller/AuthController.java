@@ -1,8 +1,10 @@
 package com.In_need.inNeedApp.controller;
 
 import com.In_need.inNeedApp.dto.*;
+import com.In_need.inNeedApp.model.Location;
 import com.In_need.inNeedApp.model.Users;
 import com.In_need.inNeedApp.repository.UserRepository;
+import com.In_need.inNeedApp.repository.VerificationRepository;
 import com.In_need.inNeedApp.services.EmailService;
 import com.In_need.inNeedApp.services.TokenBlacklistService;
 import com.In_need.inNeedApp.utils.JwtUtils;
@@ -17,17 +19,14 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
-import java.io.UnsupportedEncodingException;
-import java.net.URLDecoder;
-import java.nio.charset.StandardCharsets;
-import java.util.Date;
-import java.util.Map;
-import java.util.Optional;
-import java.util.UUID;
+import java.security.Principal;
+import java.util.*;
 import java.net.URLEncoder;
 
 @CrossOrigin(origins = "http://localhost:4200")
@@ -43,18 +42,23 @@ public class AuthController {
     private final JwtUtils jwtUtil;
     private final TokenBlacklistService blacklistService;
     private  final EmailService emailService;
+    private  final VerificationRepository verificationRepository;
 
     @Autowired
     public  AuthController(AuthenticationManager authenticationManager,
                            JwtUtils jwtUtil,
                            PasswordEncoder passwordEncoder,
-                           UserRepository userRepository, EmailService emailService, TokenBlacklistService blacklistService) {
+                           UserRepository userRepository,
+                           EmailService emailService,
+                           TokenBlacklistService blacklistService,
+                           VerificationRepository verificationRepository) {
         this.authenticationManager = authenticationManager;
         this.jwtUtil = jwtUtil;
         this.passwordEncoder = passwordEncoder;
         this.userRepository = userRepository;
         this.emailService = emailService;
         this.blacklistService = blacklistService;
+        this.verificationRepository = verificationRepository;
     }
 
     @PostMapping("/register")
@@ -223,6 +227,54 @@ public class AuthController {
         }
         return null;
     }
+
+    @Transactional(readOnly = true)
+    @GetMapping("/profile")
+    public ResponseEntity<?> getProfile(Principal principal) {
+        // 1. Authentication check
+        if (principal == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("User not authenticated");
+        }
+
+        // 2. Fetch user from database
+        Users user = userRepository.findByEmailIgnoreCase(principal.getName())
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        // 3. Build profile response
+        Map<String, Object> profile = new HashMap<>();
+        profile.put("name", user.getUsername());
+        profile.put("email", user.getEmail());
+        profile.put("bio", user.getBio());
+        profile.put("location", user.getLocation());
+
+        // 4. Add phone number if verified
+        verificationRepository.findByUserId(user.getId())
+                .ifPresent(verification -> profile.put("phone", verification.getPhoneNumber()));
+
+        return ResponseEntity.ok(profile);
+    }
+
+
+    @PatchMapping("/profile")
+    public ResponseEntity<?> updateProfile(@RequestBody UserProfileUpdateRequest request, Principal principal) {
+        Users user = userRepository.findByEmailIgnoreCase(principal.getName())
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        if (request.getBio() != null) {
+            user.setBio(request.getBio());
+        }
+
+        if (request.getLocation() != null) {
+            user.setLocation(new Location(
+                    request.getLocation().getCity(),
+                    request.getLocation().getProvince()
+            ));
+        }
+
+        userRepository.save(user);
+        return ResponseEntity.ok(Map.of("message", "Profile updated successfully"));
+    }
+
 
 }
 

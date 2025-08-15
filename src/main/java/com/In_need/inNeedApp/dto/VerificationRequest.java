@@ -1,6 +1,10 @@
 package com.In_need.inNeedApp.dto;
 
 import com.In_need.inNeedApp.model.Documents;
+import com.In_need.inNeedApp.model.Users;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Pattern;
@@ -29,6 +33,7 @@ public class VerificationRequest {
             message = "Website must be a valid HTTPS link"
     )
     private String website;
+
     @NotEmpty(message = "At least one document URL must be provided")
     private List<String> documents;
 

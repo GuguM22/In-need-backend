@@ -12,18 +12,21 @@ import java.util.Optional;
 @Repository
 public interface VerificationRepository extends JpaRepository<Verification, Long> {
 
-    // Find by phone number
     Optional<Verification> findByPhoneNumber(String phoneNumber);
 
-    // Find by website
     Optional<Verification> findByWebsite(String website);
 
-    // Check if phone exists
     boolean existsByPhoneNumber(String phoneNumber);
-
-    // Search all by partial website match
-    //List<Verification> findByWebsiteContainingIgnoreCase(String keyword);
 
     @Query("SELECT v FROM Verification v LEFT JOIN FETCH v.documents WHERE v.id = :id")
     Optional<Verification> findByIdWithDocuments(@Param("id") Long id);
+
+    @Query("SELECT CASE WHEN COUNT(v) > 0 THEN true ELSE false END " +
+            "FROM Verification v " +
+            "WHERE SUBSTRING(v.phoneNumber, LENGTH(v.phoneNumber) - 9, 10) = :lastTenDigits")
+    boolean existsByLastTenDigits(@Param("lastTenDigits") String lastTenDigits);
+
+
+    Optional<Verification> findByUserId(Long userId);
 }
+

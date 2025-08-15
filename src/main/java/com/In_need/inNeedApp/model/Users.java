@@ -32,11 +32,20 @@ public class Users {
     @Column(name = "username")
     private String username;
 
+    @Column(columnDefinition = "TEXT")
+    private String bio;
+
+    @Embedded
+    private Location location;
+
 //    @Column(name = "verification_token")
 //    private String verificationToken;
 
    /* @Column(name = "verified")
     private boolean verified = false; */
+
+    @Column(name = "verified")
+    private boolean verified = false;
 
     @Column(name = "reset_token")
     private String resetToken;

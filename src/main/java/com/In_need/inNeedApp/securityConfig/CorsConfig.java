@@ -64,9 +64,11 @@ public class CorsConfig {
                                 "/auth/reset-password",
                                 "/auth/logout",
                                 "/api/verify/verification",
-                                "/api/verify/upload"
+                                "/api/verify/upload",
+                                "/api/verify/exists/phone/**",
+                                "/api/verify/verified"
                         ).permitAll()
-
+                        .requestMatchers("/auth/profile").authenticated()
                         .requestMatchers("/ADMIN/**").hasRole("ADMIN")
                         .requestMatchers("/ORGANIZATION/**").hasRole("ORGANIZATION")
                         .requestMatchers("/INDIVIDUAL/**").hasRole("INDIVIDUAL")
@@ -126,7 +128,7 @@ public class CorsConfig {
             // Indicates which HTTP methods from the permitted origins are permitted.
             //  Requests such as GET, POST, PUT, DELETE, and OPTIONS are supported.
             // Requests made with methods not on this list will be rejected.
-            configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+            configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
             // Gives the frontend permission to include specific headers in the request.
             //  All headers are permitted when "*" is used.
             //  Both default and custom headers (such as Authorization, Content-Type, etc.) can be sent by the frontend.
