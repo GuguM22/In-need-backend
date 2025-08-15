@@ -67,11 +67,12 @@ public class CorsConfig {
                                 "/api/verify/upload"
                         ).permitAll()
 
-                        .requestMatchers("/ADMIN/**").hasRole("ADMIN")
+                        .requestMatchers("/api/admin/**").hasRole("ADMIN")
                         .requestMatchers("/ORGANIZATION/**").hasRole("ORGANIZATION")
                         .requestMatchers("/INDIVIDUAL/**").hasRole("INDIVIDUAL")
                         .requestMatchers("/SPONSORS/**").hasAnyRole("SPONSORS", "ADMIN")
                         .requestMatchers("/auth/donations/**").hasAnyRole("SPONSORS")
+                        .requestMatchers("/api/admin/**").permitAll()
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))

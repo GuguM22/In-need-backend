@@ -1,5 +1,6 @@
 package com.In_need.inNeedApp.model;
 
+import com.In_need.inNeedApp.constant.Status;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -24,6 +25,10 @@ public class Verification {
 
     @Column(name = "website")
     private String website;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private Status status = Status.PENDING;
 
     @OneToMany(mappedBy = "verification", fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Documents> documents = new ArrayList<>();

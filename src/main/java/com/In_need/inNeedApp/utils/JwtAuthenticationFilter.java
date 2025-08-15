@@ -2,19 +2,26 @@ package com.In_need.inNeedApp.utils;
 
 
 import com.In_need.inNeedApp.services.TokenBlacklistService;
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.security.Keys;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
+import javax.crypto.SecretKey;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.stream.Collectors;
+
 @Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
@@ -76,6 +83,24 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     }
 
     private Collection<? extends GrantedAuthority> getAuthorities(String token) {
+        SecretKey key = Keys.hmacShaKeyFor(jwtUtil.getSecret().getBytes());
+        Claims claims = Jwts.parserBuilder()
+                .setSigningKey(key)
+                .build()
+                .parseClaimsJws(token)
+                .getBody();
+
+        Object rolesObject = claims.get("roles");
+
+        if (rolesObject instanceof Collection<?>) {
+            Collection<?> roles = (Collection<?>) rolesObject;
+
+            return roles.stream()
+                    .filter(role -> role instanceof String)
+                    .map(role -> new SimpleGrantedAuthority((String) role))
+                    .toList();
+        }
+
         return Collections.emptyList();
     }
 }
