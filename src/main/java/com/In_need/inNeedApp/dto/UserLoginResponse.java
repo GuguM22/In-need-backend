@@ -11,4 +11,6 @@ public class UserLoginResponse {
     private String token;
     private String role;
     private String email;
+    private boolean verified;
+
 }

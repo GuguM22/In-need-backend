@@ -45,6 +45,9 @@ public class Users {
     @Column(name = "role", nullable = false)
     private  Role role;
 
+    @Column(name = "verified")
+    private Boolean verified = false;
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
