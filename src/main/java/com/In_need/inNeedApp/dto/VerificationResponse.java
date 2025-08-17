@@ -18,4 +18,6 @@ public class VerificationResponse {
         private String website;
         private List<String> documents;
         private Status status;
+        private String email; // add this
+
 }

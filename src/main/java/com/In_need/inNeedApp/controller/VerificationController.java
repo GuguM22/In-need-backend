@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.security.Principal;
 import java.util.*;
 
 @RestController
@@ -31,11 +32,16 @@ public class VerificationController {
 
     @PostMapping("/verification")
     public ResponseEntity<Map<String, Object>> createVerification(
-            @Valid @RequestBody VerificationRequest verificationRequest) {
+            @Valid @RequestBody VerificationRequest verificationRequest,
+            Principal principal) {
+
+        String userEmail = principal.getName(); // email from Spring Security context
 
         Verification verification = Verification.builder()
                 .phoneNumber(verificationRequest.getPhone())
                 .website(verificationRequest.getWebsite())
+                .status(Status.PENDING)
+                .email(userEmail) // set email directly
                 .build();
 
         verificationRepository.save(verification);

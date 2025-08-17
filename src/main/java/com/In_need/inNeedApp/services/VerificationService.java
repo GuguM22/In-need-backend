@@ -49,6 +49,7 @@ public class VerificationService {
                 .website(verification.getWebsite())
                 .status(verification.getStatus())
                 .documents(documentFileNames)
+                .email(verification.getEmail()) // include it
                 .build();
     }
 

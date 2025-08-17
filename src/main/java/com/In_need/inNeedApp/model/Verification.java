@@ -30,6 +30,10 @@ public class Verification {
     @Column(nullable = false)
     private Status status = Status.PENDING;
 
+    @Column(nullable = false)
+    private String email; // store user's email directly
+
+
     @OneToMany(mappedBy = "verification", fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Documents> documents = new ArrayList<>();
 
