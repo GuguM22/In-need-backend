@@ -37,7 +37,7 @@ public class VerificationService {
        // return verificationRepository.findByWebsiteContainingIgnoreCase(keyword);
     //}
 
-    private VerificationResponse mapToDto(Verification verification) {
+    public VerificationResponse mapToDto(Verification verification) {
         List<String> documentFileNames = verification.getDocuments()
                 .stream()
                 .map(Documents::getFileName)
@@ -49,7 +49,8 @@ public class VerificationService {
                 .website(verification.getWebsite())
                 .status(verification.getStatus())
                 .documents(documentFileNames)
-                .email(verification.getEmail()) // include it
+                .email(verification.getEmail())
+                .userId(verification.getUser() != null ? verification.getUser().getId() : null)
                 .build();
     }
 
@@ -66,5 +67,14 @@ public class VerificationService {
     public List<VerificationResponse> getAllPending() {
         return getAllByStatus(Status.PENDING);
     }
+
+    @Transactional(readOnly = true)
+    public List<VerificationResponse> getAll() {
+        return verificationRepository.findAll()
+                .stream()
+                .map(this::mapToDto)
+                .collect(Collectors.toList());
+    }
+
 
 }

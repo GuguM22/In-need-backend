@@ -19,5 +19,6 @@ public class VerificationResponse {
         private List<String> documents;
         private Status status;
         private String email; // add this
+        private Long userId;
 
 }

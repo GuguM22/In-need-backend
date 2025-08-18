@@ -4,7 +4,9 @@ import com.In_need.inNeedApp.constant.Status;
 import com.In_need.inNeedApp.dto.VerificationRequest;
 import com.In_need.inNeedApp.dto.VerificationResponse;
 import com.In_need.inNeedApp.model.Documents;
+import com.In_need.inNeedApp.model.Users;
 import com.In_need.inNeedApp.model.Verification;
+import com.In_need.inNeedApp.repository.UserRepository;
 import com.In_need.inNeedApp.repository.VerificationRepository;
 import com.In_need.inNeedApp.services.VerificationService;
 import jakarta.validation.Valid;
@@ -16,6 +18,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.security.Principal;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/verify")
@@ -23,11 +26,13 @@ import java.util.*;
 public class VerificationController {
     private final VerificationRepository verificationRepository;
     private final VerificationService verificationService;
+    private final UserRepository user;
 
     @Autowired
-    public VerificationController(VerificationRepository verificationRepository, VerificationService verificationService) {
+    public VerificationController(VerificationRepository verificationRepository, VerificationService verificationService, UserRepository user) {
         this.verificationRepository = verificationRepository;
         this.verificationService = verificationService;
+        this.user = user;
     }
 
     @PostMapping("/verification")
@@ -36,12 +41,15 @@ public class VerificationController {
             Principal principal) {
 
         String userEmail = principal.getName(); // email from Spring Security context
+        Users foundUser = user.findByEmailIgnoreCase(userEmail)
+                .orElseThrow(() -> new RuntimeException("User not found"));
 
         Verification verification = Verification.builder()
                 .phoneNumber(verificationRequest.getPhone())
                 .website(verificationRequest.getWebsite())
                 .status(Status.PENDING)
-                .email(userEmail) // set email directly
+                .email(userEmail)
+                .user(foundUser)
                 .build();
 
         verificationRepository.save(verification);
@@ -128,6 +136,84 @@ public ResponseEntity<Map<String, Object>> uploadFiles(
     public ResponseEntity<List<VerificationResponse>> getPendingVerifications() {
         List<VerificationResponse> pending = verificationService.getAllByStatus(Status.PENDING);
         return ResponseEntity.ok(pending);
+    }
+
+//    @PutMapping("/{id}/status")
+//    public ResponseEntity<?> updateVerificationStatus(
+//            @PathVariable Long id,
+//            @RequestParam Status status) {
+//
+//        Optional<Verification> optionalVerification = verificationRepository.findById(id);
+//        if (optionalVerification.isEmpty()) {
+//            return ResponseEntity.notFound().build();
+//        }
+//
+//        Verification verification = optionalVerification.get();
+//        verification.setStatus(status);
+//        verificationRepository.save(verification);
+//
+//        return ResponseEntity.ok(Map.of(
+//                "id", verification.getId(),
+//                "status", verification.getStatus(),
+//                "message", "Verification status updated successfully"
+//        ));
+//    }
+
+    @PutMapping("/{id}/status")
+    public ResponseEntity<?> updateVerificationStatus(
+            @PathVariable Long id,
+            @RequestBody Map<String, String> body) {
+
+        String statusStr = body.get("status");
+        Status status = Status.valueOf(statusStr);
+
+        Optional<Verification> optionalVerification = verificationRepository.findById(id);
+        if (optionalVerification.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+
+        Verification verification = optionalVerification.get();
+        verification.setStatus(status);
+        verificationRepository.save(verification);
+
+        return ResponseEntity.ok(Map.of(
+                "id", verification.getId(),
+                "status", verification.getStatus(),
+                "message", "Verification status updated successfully"
+        ));
+    }
+
+
+    //    @PutMapping("/{id}/status")
+//    public ResponseEntity<?> updateStatus(@PathVariable Long id, @RequestBody Map<String, String> body) {
+//        Verification verification = verificationRepository.findById(id)
+//                .orElseThrow(() -> new RuntimeException("Verification not found"));
+//
+//        String statusStr = body.get("status");
+//        Status status = Status.valueOf(statusStr);
+//
+//        verification.setStatus(status);
+//        verificationRepository.save(verification);
+//
+//        return ResponseEntity.ok(Map.of(
+//                "id", verification.getId(),
+//                "status", verification.getStatus(),
+//                "message", "Verification status updated successfully"
+//        ));
+//    }
+    @GetMapping("/verifications/rejected")
+    public ResponseEntity<List<VerificationResponse>> getRejectedVerifications() {
+        List<VerificationResponse> rejected = verificationService.getAllByStatus(Status.REJECTED);
+        return ResponseEntity.ok(rejected);
+    }
+
+    @GetMapping("/verifications/all")
+    public ResponseEntity<List<VerificationResponse>> getAllVerifications() {
+        List<Verification> allVerifications = verificationRepository.findAll();
+        List<VerificationResponse> responseList = allVerifications.stream()
+                .map(verificationService::mapToDto) // make mapToDto public if needed
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(responseList);
     }
 
 
