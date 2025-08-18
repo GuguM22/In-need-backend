@@ -37,4 +37,8 @@ public class Verification {
     @OneToMany(mappedBy = "verification", fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Documents> documents = new ArrayList<>();
 
+    @ManyToOne
+    @JoinColumn(name = "user_id", nullable = false)
+    private Users user;
+
 }

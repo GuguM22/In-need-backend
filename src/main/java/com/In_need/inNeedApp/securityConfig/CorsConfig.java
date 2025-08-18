@@ -64,15 +64,17 @@ public class CorsConfig {
                                 "/auth/reset-password",
                                 "/auth/logout",
                                 "/api/verify/verification",
-                                "/api/verify/upload"
+                                "/api/verify/upload",
+                                "/documents/**"
                         ).permitAll()
 
-                        .requestMatchers("/api/admin/**").hasRole("ADMIN")
+//                        .requestMatchers("/api/admin/**").hasRole("ADMIN")
                         .requestMatchers("/ORGANIZATION/**").hasRole("ORGANIZATION")
                         .requestMatchers("/INDIVIDUAL/**").hasRole("INDIVIDUAL")
                         .requestMatchers("/SPONSORS/**").hasAnyRole("SPONSORS", "ADMIN")
                         .requestMatchers("/auth/donations/**").hasAnyRole("SPONSORS")
-                        .requestMatchers("/api/admin/**").permitAll()
+                        .requestMatchers("/api/admin/**")
+                        .permitAll()
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))

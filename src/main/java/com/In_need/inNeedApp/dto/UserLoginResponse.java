@@ -12,5 +12,5 @@ public class UserLoginResponse {
     private String role;
     private String email;
     private boolean verified;
-
+    private Long id;
 }
