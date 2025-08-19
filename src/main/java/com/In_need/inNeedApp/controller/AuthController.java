@@ -7,13 +7,18 @@ import com.In_need.inNeedApp.repository.UserRepository;
 import com.In_need.inNeedApp.repository.VerificationRepository;
 import com.In_need.inNeedApp.services.EmailService;
 import com.In_need.inNeedApp.services.TokenBlacklistService;
+import com.In_need.inNeedApp.services.UserProfileService;
 import com.In_need.inNeedApp.utils.JwtUtils;
+import jakarta.annotation.Resource;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.UrlResource;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -24,10 +29,18 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.MalformedURLException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.security.Principal;
 import java.util.*;
-import java.net.URLEncoder;
+
 
 @CrossOrigin(origins = "http://localhost:4200")
 @RestController
@@ -43,6 +56,11 @@ public class AuthController {
     private final TokenBlacklistService blacklistService;
     private  final EmailService emailService;
     private  final VerificationRepository verificationRepository;
+    private final UserProfileService  userProfileService;
+
+    private static final String UPLOAD_DIR = "uploads/";
+    private static final long MAX_FILE_SIZE = 2 * 1024 * 1024; // 2MB
+    private static final List<String> ALLOWED_CONTENT_TYPES = List.of("image/jpeg", "image/png", "image/gif");
 
     @Autowired
     public  AuthController(AuthenticationManager authenticationManager,
@@ -51,7 +69,8 @@ public class AuthController {
                            UserRepository userRepository,
                            EmailService emailService,
                            TokenBlacklistService blacklistService,
-                           VerificationRepository verificationRepository) {
+                           VerificationRepository verificationRepository,
+                           UserProfileService  userProfileService) {
         this.authenticationManager = authenticationManager;
         this.jwtUtil = jwtUtil;
         this.passwordEncoder = passwordEncoder;
@@ -59,6 +78,7 @@ public class AuthController {
         this.emailService = emailService;
         this.blacklistService = blacklistService;
         this.verificationRepository = verificationRepository;
+        this.userProfileService = userProfileService;
     }
 
     @PostMapping("/register")
@@ -242,10 +262,15 @@ public class AuthController {
 
         // 3. Build profile response
         Map<String, Object> profile = new HashMap<>();
-        profile.put("name", user.getUsername());
+        profile.put("name", user.getUsername());   // or user.getName() depending on your entity
         profile.put("email", user.getEmail());
         profile.put("bio", user.getBio());
         profile.put("location", user.getLocation());
+
+        // Include profileImagePath
+        if (user.getProfileImagePath() != null) {
+            profile.put("profileImagePath", user.getProfileImagePath());
+        }
 
         // 4. Add phone number if verified
         verificationRepository.findByUserId(user.getId())
@@ -275,6 +300,86 @@ public class AuthController {
         return ResponseEntity.ok(Map.of("message", "Profile updated successfully"));
     }
 
+    @PostMapping("/upload-profile-image")
+    public ResponseEntity<?> uploadProfileImage(
+            @RequestParam("profileImage") MultipartFile file,
+            @RequestHeader("Authorization") String authHeader) {
+
+        try {
+            String token = authHeader.replace("Bearer ", "");
+            String username = jwtUtil.extractUsername(token);
+
+            if (username == null) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                        .body(Map.of("error", "Invalid token"));
+            }
+
+            if (file.isEmpty()) {
+                return ResponseEntity.badRequest()
+                        .body(Map.of("error", "File cannot be empty"));
+            }
+
+            if (file.getSize() > MAX_FILE_SIZE) {
+                return ResponseEntity.badRequest()
+                        .body(Map.of("error", "File size exceeds 2MB limit"));
+            }
+
+            String contentType = file.getContentType();
+            if (contentType == null || !ALLOWED_CONTENT_TYPES.contains(contentType)) {
+                return ResponseEntity.badRequest()
+                        .body(Map.of("error", "Only JPG, PNG, GIF, or WEBP images are allowed"));
+            }
+
+            Path uploadPath = Paths.get(UPLOAD_DIR).toAbsolutePath().normalize();
+            Files.createDirectories(uploadPath);
+
+            String fileExtension = Objects.requireNonNull(file.getOriginalFilename())
+                    .substring(file.getOriginalFilename().lastIndexOf("."));
+            String uniqueFilename = UUID.randomUUID() + fileExtension;
+            Path filePath = uploadPath.resolve(uniqueFilename);
+
+            try (InputStream inputStream = file.getInputStream()) {
+                Files.copy(inputStream, filePath, StandardCopyOption.REPLACE_EXISTING);
+            }
+
+            // store only filename in DB
+            userProfileService.updateUserProfileImage(username, uniqueFilename);
+
+            return ResponseEntity.ok()
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .body(Map.of(
+                            "success", true,
+                            "message", "File uploaded successfully",
+                            "filePath", "/auth/images/" + uniqueFilename, // frontend sees this
+                            "contentType", contentType,
+                            "size", file.getSize()
+                    ));
+
+        } catch (IOException e) {
+            return ResponseEntity.internalServerError()
+                    .body(Map.of("error", "File processing error: " + e.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError()
+                    .body(Map.of("error", "Server error: " + e.getMessage()));
+        }
+    }
+
+
+    @GetMapping("/auth/images/{filename:.+}")
+    public ResponseEntity<Resource> getImage(@PathVariable String filename) throws IOException {
+        Path filePath = Paths.get("uploads").resolve(filename).normalize();
+        System.out.println(filePath.toAbsolutePath());
+        UrlResource resource = new UrlResource(filePath.toAbsolutePath().toUri());
+
+        if (!resource.exists() || !resource.isReadable()) {
+            return ResponseEntity.notFound().build();
+        }
+
+        String contentType = Files.probeContentType(filePath);
+        return ResponseEntity.ok()
+                .contentType(MediaType.parseMediaType(contentType))
+                .body((Resource) resource);
+    }
 
 }
 

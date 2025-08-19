@@ -54,6 +54,9 @@ public class Users {
     @Column(name = "role", nullable = false)
     private  Role role;
 
+    @Column(name = "profile_image_path")
+    private String profileImagePath;
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

@@ -43,8 +43,8 @@ public class VerificationController {
         Users user = userRepository.findByEmailIgnoreCase(email)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
-        // Only allow ORGANIZATION and INDIVIDUAL
-        if (user.getRole() != Role.ORGANIZATION && user.getRole() != Role.INDIVIDUAL) {
+        // Only allow ORGANIZATION
+        if (user.getRole() != Role.ORGANIZATION /*user.getRole() != Role.INDIVIDUAL*/) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN)
                     .body(Map.of("error", "Verification not required for your role"));
         }

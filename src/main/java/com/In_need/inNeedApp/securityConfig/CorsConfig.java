@@ -23,6 +23,7 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
+import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import java.util.List;
@@ -50,6 +51,16 @@ public class CorsConfig {
 //            };
 //        }
 
+    @Configuration
+    public class WebConfig implements WebMvcConfigurer {
+
+        @Override
+        public void addResourceHandlers(ResourceHandlerRegistry registry) {
+            registry.addResourceHandler("/auth/images/**")
+                    .addResourceLocations("file:uploads/");
+        }
+    }
+
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http, JwtAuthenticationFilter jwtAuthenticationFilter) throws Exception {
         http
@@ -63,11 +74,13 @@ public class CorsConfig {
                                 "/auth/forgot-password",
                                 "/auth/reset-password",
                                 "/auth/logout",
+                                "/auth/upload-profile-image",
                                 "/api/verify/verification",
                                 "/api/verify/upload",
                                 "/api/verify/exists/phone/**",
                                 "/api/verify/verified"
                         ).permitAll()
+                        .requestMatchers("/auth/images/**").permitAll()
                         .requestMatchers("/auth/profile").authenticated()
                         .requestMatchers("/ADMIN/**").hasRole("ADMIN")
                         .requestMatchers("/ORGANIZATION/**").hasRole("ORGANIZATION")
