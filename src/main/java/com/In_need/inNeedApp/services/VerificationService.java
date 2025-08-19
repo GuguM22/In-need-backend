@@ -12,6 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -26,6 +27,7 @@ public class VerificationService {
      private final DocumentRepository documentRepository;
 
     public Verification saveVerification(Verification verification ) {
+        verification.setSubmittedDate(LocalDateTime.now());
         return verificationRepository.save(verification);
     }
 
@@ -58,6 +60,7 @@ public class VerificationService {
                 .email(verification.getEmail())
                 .userId(verification.getUser() != null ? verification.getUser().getId() : null)
                 .username(username)
+                .submittedDate(verification.getSubmittedDate())
                 .build();
     }
 
@@ -126,7 +129,6 @@ public class VerificationService {
     public Optional<Documents> findDocumentById(Long id) {
         return documentService.findDocumentById(id);
     }
-
 
 
 }
