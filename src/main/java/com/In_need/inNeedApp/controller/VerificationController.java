@@ -6,12 +6,14 @@ import com.In_need.inNeedApp.dto.VerificationResponse;
 import com.In_need.inNeedApp.model.Documents;
 import com.In_need.inNeedApp.model.Users;
 import com.In_need.inNeedApp.model.Verification;
+import com.In_need.inNeedApp.repository.DocumentRepository;
 import com.In_need.inNeedApp.repository.UserRepository;
 import com.In_need.inNeedApp.repository.VerificationRepository;
 import com.In_need.inNeedApp.services.VerificationService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -27,12 +29,14 @@ public class VerificationController {
     private final VerificationRepository verificationRepository;
     private final VerificationService verificationService;
     private final UserRepository user;
+    private final DocumentRepository documentRepository;
 
     @Autowired
-    public VerificationController(VerificationRepository verificationRepository, VerificationService verificationService, UserRepository user) {
+    public VerificationController(VerificationRepository verificationRepository, VerificationService verificationService, UserRepository user, DocumentRepository documentRepository) {
         this.verificationRepository = verificationRepository;
         this.verificationService = verificationService;
         this.user = user;
+        this.documentRepository = documentRepository;
     }
 
     @PostMapping("/verification")
@@ -217,5 +221,22 @@ public ResponseEntity<Map<String, Object>> uploadFiles(
     }
 
 
+    @Transactional(readOnly = true)
+    @GetMapping("/download/{fileName}")
+    public ResponseEntity<byte[]> downloadDocument(@PathVariable("fileName") String fileName) {
+        List<Documents> docOptional = documentRepository.findByFileName(fileName);
+
+        if (docOptional.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+
+//        Documents document = docOptional.get();
+        Documents document = docOptional.get(0);
+
+        return ResponseEntity.ok()
+                .header("Content-Disposition", "attachment; filename=\"" + document.getFileName() + "\"")
+                .contentType(org.springframework.http.MediaType.APPLICATION_PDF)
+                .body(document.getData());
+    }
 
 }
