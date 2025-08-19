@@ -56,7 +56,7 @@ public class VerificationController {
                 .user(foundUser)
                 .build();
 
-        verificationRepository.save(verification);
+        verificationService.saveVerification(verification);
 
         Map<String, Object> response = new HashMap<>();
         response.put("id", verification.getId());
