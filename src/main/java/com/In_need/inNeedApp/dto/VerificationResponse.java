@@ -20,5 +20,5 @@ public class VerificationResponse {
         private Status status;
         private String email; // add this
         private Long userId;
-
+        private String username;
 }

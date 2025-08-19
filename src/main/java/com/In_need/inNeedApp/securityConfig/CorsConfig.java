@@ -65,6 +65,7 @@ public class CorsConfig {
                                 "/auth/logout",
                                 "/api/verify/verification",
                                 "/api/verify/upload",
+                                "/api/verify/download/**",
                                 "/documents/**"
                         ).permitAll()
 
