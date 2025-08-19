@@ -35,7 +35,7 @@ public class individual_request {
         this.title = title;
         this.urgency = urgency;
         this.quantity = quantity;
-        this.neededByDate = neededByDate;
+        this.neededByDate    = neededByDate;
         this.description = description;
         this.mediaUrls = mediaUrls;
     }

@@ -1,5 +1,6 @@
 package com.In_need.inNeedApp.controller;
 
+import com.In_need.inNeedApp.dto.sponsorRequest;
 import com.In_need.inNeedApp.model.sponsor_request;
 import com.In_need.inNeedApp.services.SponsorRequestService;
 import org.springframework.http.ResponseEntity;
@@ -47,9 +48,12 @@ public class sponsor_requestController {
 
 
 
-            sponsor_request saved = sponsorRequestService.save(request);
-            return ResponseEntity.ok(saved);
+            request.setMediaUrls(mediaUrls); // assuming your model has this field
 
+            // Save using your service
+            sponsor_request savedRequest = sponsorRequestService.saveSponsorRequest(request);
+
+            return ResponseEntity.ok(savedRequest);
         } catch (Exception e) {
             e.printStackTrace();
             return ResponseEntity.badRequest().build();
