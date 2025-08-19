@@ -151,7 +151,7 @@ public class AuthController {
             String token = jwtUtil.generateToken(authentication.getName(), authentication.getAuthorities());
 
 
-            return ResponseEntity.ok(new UserLoginResponse(token, user.getRole().name(), user.getEmail(), Boolean.TRUE.equals(user.getVerified()), user.getId()));
+            return ResponseEntity.ok(new UserLoginResponse(token, user.getRole().name(), user.getEmail(), Boolean.TRUE.equals(user.getVerified()), user.getId(), user.getUsername()));
 
 
 

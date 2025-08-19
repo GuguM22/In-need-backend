@@ -13,4 +13,6 @@ public class UserLoginResponse {
     private String email;
     private boolean verified;
     private Long id;
+    private String username;
+
 }

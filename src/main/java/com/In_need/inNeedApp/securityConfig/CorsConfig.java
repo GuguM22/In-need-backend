@@ -82,8 +82,13 @@ public class CorsConfig {
                                 "/auth/profile",
                                 "/api/verify/verification",
                                 "/api/verify/upload",
+ 
                                 //"/api/verify/exists/phone/**",
                                 "/api/verify/verified"
+ 
+                                "/api/verify/download/**",
+                                "/documents/**"
+ 
                         ).permitAll()
                         .requestMatchers("/auth/images/**").permitAll()
                         .requestMatchers("/api/verify/exists/phone/**").permitAll()

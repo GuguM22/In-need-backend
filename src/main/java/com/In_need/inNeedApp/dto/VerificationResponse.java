@@ -6,6 +6,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Data
@@ -20,5 +21,6 @@ public class VerificationResponse {
         private Status status;
         private String email; // add this
         private Long userId;
-
+        private String username;
+        private LocalDateTime submittedDate;
 }

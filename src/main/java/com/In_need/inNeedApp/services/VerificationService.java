@@ -6,12 +6,14 @@ import com.In_need.inNeedApp.dto.VerificationResponse;
 import com.In_need.inNeedApp.model.Documents;
 import com.In_need.inNeedApp.model.Users;
 import com.In_need.inNeedApp.model.Verification;
+import com.In_need.inNeedApp.repository.DocumentRepository;
 import com.In_need.inNeedApp.repository.UserRepository;
 import com.In_need.inNeedApp.repository.VerificationRepository;
 import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -23,9 +25,10 @@ public class VerificationService {
     private final VerificationRepository  verificationRepository;
     private final DocumentService documentService;
     private final UserRepository usersRepository;
-
+     private final DocumentRepository documentRepository;
 
     public Verification saveVerification(Verification verification ) {
+        verification.setSubmittedDate(LocalDateTime.now());
         return verificationRepository.save(verification);
     }
 
@@ -47,6 +50,8 @@ public class VerificationService {
                 .map(Documents::getFileName)
                 .collect(Collectors.toList());
 
+        String username = verification.getUser() != null ? verification.getUser().getUsername() : null;
+
         return VerificationResponse.builder()
                 .id(verification.getId())
                 .phone(verification.getPhoneNumber())
@@ -55,8 +60,11 @@ public class VerificationService {
                 .documents(documentFileNames)
                 .email(verification.getEmail())
                 .userId(verification.getUser() != null ? verification.getUser().getId() : null)
+                .username(username)
+                .submittedDate(verification.getSubmittedDate())
                 .build();
     }
+
 
     @Transactional(readOnly = true)
     public List<VerificationResponse> getAllByStatus(Status status) {
@@ -120,7 +128,7 @@ public class VerificationService {
         }
     }
 
-    @Transactional
+     @Transactional
     public Verification createVerification(VerificationRequest request, String userEmail) {
         // Find the user by email
         Users user = usersRepository.findByEmailIgnoreCase(userEmail)
@@ -153,5 +161,10 @@ public class VerificationService {
 
         return verificationRepository.save(verification);
     }
+     public Optional<Documents> findDocumentById(Long id) {
+        return documentService.findDocumentById(id);
+    }
+
+ 
 
 }
