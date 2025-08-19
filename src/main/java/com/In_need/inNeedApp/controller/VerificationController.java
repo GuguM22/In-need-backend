@@ -164,23 +164,23 @@ public ResponseEntity<Map<String, Object>> uploadFiles(
             @PathVariable Long id,
             @RequestBody Map<String, String> body) {
 
-        String statusStr = body.get("status");
-        Status status = Status.valueOf(statusStr);
+        try {
+            String statusStr = body.get("status");
+            Status status = Status.valueOf(statusStr);
 
-        Optional<Verification> optionalVerification = verificationRepository.findById(id);
-        if (optionalVerification.isEmpty()) {
-            return ResponseEntity.notFound().build();
+            verificationService.updateVerificationStatus(id, status);
+
+            return ResponseEntity.ok(Map.of(
+                    "id", id,
+                    "status", status,
+                    "message", "Verification status and user verification updated successfully"
+            ));
+
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body(Map.of("error", "Something went wrong"));
         }
-
-        Verification verification = optionalVerification.get();
-        verification.setStatus(status);
-        verificationRepository.save(verification);
-
-        return ResponseEntity.ok(Map.of(
-                "id", verification.getId(),
-                "status", verification.getStatus(),
-                "message", "Verification status updated successfully"
-        ));
     }
 
 
