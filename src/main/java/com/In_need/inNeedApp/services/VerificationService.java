@@ -1,6 +1,7 @@
 package com.In_need.inNeedApp.services;
 
 import com.In_need.inNeedApp.constant.Status;
+import com.In_need.inNeedApp.dto.VerificationRequest;
 import com.In_need.inNeedApp.dto.VerificationResponse;
 import com.In_need.inNeedApp.model.Documents;
 import com.In_need.inNeedApp.model.Users;
@@ -73,6 +74,7 @@ public class VerificationService {
                 .collect(Collectors.toList());
     }
 
+
     // Get all pending verifications
     @Transactional(readOnly = true)
     public List<VerificationResponse> getAllPending() {
@@ -126,9 +128,43 @@ public class VerificationService {
         }
     }
 
-    public Optional<Documents> findDocumentById(Long id) {
+     @Transactional
+    public Verification createVerification(VerificationRequest request, String userEmail) {
+        // Find the user by email
+        Users user = usersRepository.findByEmailIgnoreCase(userEmail)
+                .orElseThrow(() -> new RuntimeException("User not found with email: " + userEmail));
+
+        // Create and populate verification entity
+        Verification verification = new Verification();
+        verification.setId(request.getUserId());
+        verification.setEmail(userEmail);
+        verification.setPhoneNumber(request.getPhone());
+        verification.setWebsite(request.getWebsite());
+        verification.setUser(user);
+        verification.setStatus(Status.PENDING);
+
+        // Handle documents if provided
+        if (request.getDocuments() != null && !request.getDocuments().isEmpty()) {
+            List<Documents> documents = request.getDocuments().stream()
+                    .map(docRequest -> {
+                        Documents document = new Documents();
+                        document.setId(document.getId());
+                        document.setFileName(document.getFileName());
+                        document.setData(document.getData());
+                        document.setVerification(document.getVerification());
+                        document.setVerification(verification);
+                        return document;
+                    })
+                    .collect(Collectors.toList());
+            verification.setDocuments(documents);
+        }
+
+        return verificationRepository.save(verification);
+    }
+     public Optional<Documents> findDocumentById(Long id) {
         return documentService.findDocumentById(id);
     }
 
+ 
 
 }
