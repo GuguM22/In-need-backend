@@ -19,6 +19,8 @@ public class Documents {
     private String fileName;
 
     @Lob
+    @Basic(fetch = FetchType.LAZY)
+    @Column(name = "data")
     private byte[] data;
 
     @ManyToOne(fetch = FetchType.LAZY)

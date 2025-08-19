@@ -4,6 +4,8 @@ import com.In_need.inNeedApp.services.CustomUserDetailsService;
 import com.In_need.inNeedApp.services.TokenBlacklistService;
 import com.In_need.inNeedApp.utils.JwtAuthenticationFilter;
 import com.In_need.inNeedApp.utils.JwtUtils;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -51,6 +53,8 @@ public class CorsConfig {
 //            };
 //        }
 
+
+
     @Configuration
     public class WebConfig implements WebMvcConfigurer {
 
@@ -94,7 +98,6 @@ public class CorsConfig {
 
         return http.build();
     }
-
 
 
     @Bean
@@ -141,7 +144,7 @@ public class CorsConfig {
             // Indicates which HTTP methods from the permitted origins are permitted.
             //  Requests such as GET, POST, PUT, DELETE, and OPTIONS are supported.
             // Requests made with methods not on this list will be rejected.
-            configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
+            configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
             // Gives the frontend permission to include specific headers in the request.
             //  All headers are permitted when "*" is used.
             //  Both default and custom headers (such as Authorization, Content-Type, etc.) can be sent by the frontend.

@@ -151,7 +151,7 @@ public class AuthController {
             String token = jwtUtil.generateToken(authentication.getName(), authentication.getAuthorities());
 
 
-            return ResponseEntity.ok(new UserLoginResponse(token, user.getRole().name(), user.getEmail()));
+            return ResponseEntity.ok(new UserLoginResponse(token, user.getRole().name(), user.getEmail(), Boolean.TRUE.equals(user.getVerified()), user.getId()));
 
 
 
@@ -380,6 +380,8 @@ public class AuthController {
                 .contentType(MediaType.parseMediaType(contentType))
                 .body((Resource) resource);
     }
+
+
 
 }
 
