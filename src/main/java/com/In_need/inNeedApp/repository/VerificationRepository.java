@@ -32,4 +32,5 @@ public interface VerificationRepository extends JpaRepository<Verification, Long
     Optional<Verification> findByIdWithDocuments(@Param("id") Long id);
 
     Optional<Verification> findByUserId(Long id);
+    Optional<Verification> findByUserIdAndStatus(Long userId, Status status);
 }

@@ -37,4 +37,6 @@ public class VerificationRequest {
     @NotEmpty(message = "At least one document URL must be provided")
     private List<String> documents;
     private Long userId;
+
+
 }

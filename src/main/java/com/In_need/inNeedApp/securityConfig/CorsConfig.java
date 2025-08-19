@@ -82,10 +82,12 @@ public class CorsConfig {
                                 "/auth/profile",
                                 "/api/verify/verification",
                                 "/api/verify/upload",
-                                "/api/verify/exists/phone/**",
+                                //"/api/verify/exists/phone/**",
                                 "/api/verify/verified"
                         ).permitAll()
                         .requestMatchers("/auth/images/**").permitAll()
+                        .requestMatchers("/api/verify/exists/phone/**").permitAll()
+                        .requestMatchers("/api/verify/verification/status/**").permitAll()
                         .requestMatchers("/auth/profile").authenticated()
                         .requestMatchers("/ADMIN/**").hasRole("ADMIN")
                         .requestMatchers("/ORGANIZATION/**").hasRole("ORGANIZATION")
