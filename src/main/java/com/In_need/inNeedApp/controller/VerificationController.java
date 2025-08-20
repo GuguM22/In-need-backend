@@ -2,6 +2,7 @@ package com.In_need.inNeedApp.controller;
 
 import com.In_need.inNeedApp.constant.Status;
 import com.In_need.inNeedApp.dto.VerificationRequest;
+import com.In_need.inNeedApp.dto.VerificationResponse;
 import com.In_need.inNeedApp.model.Documents;
 import com.In_need.inNeedApp.model.Users;
 import com.In_need.inNeedApp.model.Verification;
@@ -19,6 +20,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/verify")
@@ -26,11 +28,14 @@ import java.util.*;
 public class VerificationController {
 
     private final VerificationRepository verificationRepository;
+    private final VerificationService verificationService;
+    private final UserRepository userRepository;
+    private final DocumentRepository documentRepository;
 
     public VerificationController(VerificationRepository verificationRepository, VerificationService verificationService, UserRepository user, DocumentRepository documentRepository) {
         this.verificationRepository = verificationRepository;
         this.verificationService = verificationService;
-        this.user = user;
+        this.userRepository = user;
         this.documentRepository = documentRepository;
     }
 
@@ -44,10 +49,10 @@ public class VerificationController {
             String userEmail = authentication.getName();
 
             // Find user by email
-            Users user =userRepository.findByEmailIgnoreCase(userEmail)
+            Users user = userRepository.findByEmailIgnoreCase(userEmail)
                     .orElseThrow(() -> new RuntimeException("User not found"));
 
-        verificationService.saveVerification(verification);
+//        verificationService.saveVerification(verification);
 
 
             // Create verification entity

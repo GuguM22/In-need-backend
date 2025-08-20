@@ -71,46 +71,45 @@ public class CorsConfig {
                 .cors(Customizer.withDefaults())
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
-                        // Public endpoints
-                        .requestMatchers(
-                                "/auth/register",
-                                "/auth/login",
-                                "/auth/forgot-password",
-                                "/auth/reset-password",
-                                "/auth/logout",
-                                "/auth/upload-profile-image",
-                                "/auth/profile",
-                                "/api/verify/verification",
-                                "/api/verify/upload",
+                                // Public endpoints
+                                .requestMatchers(
+                                        "/auth/register",
+                                        "/auth/login",
+                                        "/auth/forgot-password",
+                                        "/auth/reset-password",
+                                        "/auth/logout",
+                                        "/auth/upload-profile-image",
+                                        "/auth/profile",
+                                        "/api/verify/verification",
+                                        "/api/verify/upload",
 
-                                "/api/individual-requests"   // exact match
-                            // allow all subpaths
+                                        "/api/individual-requests",   // exact match
+                                        // allow all subpaths
 
-               
 
-                        // Role-based endpoints
+                                        // Role-based endpoints
 
- 
-                                //"/api/verify/exists/phone/**",
-                                "/api/verify/verified"
- 
-                                "/api/verify/download/**",
-                                "/documents/**"
- 
-                        ).permitAll()
-                        .requestMatchers("/auth/images/**").permitAll()
-                        .requestMatchers("/api/verify/exists/phone/**").permitAll()
-                        .requestMatchers("/api/verify/verification/status/**").permitAll()
-                        .requestMatchers("/auth/profile").authenticated()
 
-                        .requestMatchers("/ADMIN/**").hasRole("ADMIN")
+                                        //"/api/verify/exists/phone/**",
+                                        "/api/verify/verified",
+
+                                        "/api/verify/download/**",
+                                        "/documents/**"
+
+                                ).permitAll()
+                                .requestMatchers("/auth/images/**").permitAll()
+                                .requestMatchers("/api/verify/exists/phone/**").permitAll()
+                                .requestMatchers("/api/verify/verification/status/**").permitAll()
+                                .requestMatchers("/auth/profile").authenticated()
+
+                                .requestMatchers("/ADMIN/**").hasRole("ADMIN")
 //                        .requestMatchers("/ORGANIZATION/**").hasRole("ORGANIZATION")
-                        .requestMatchers("/INDIVIDUAL/**").hasRole("INDIVIDUAL")
-                        .requestMatchers("/SPONSORS/**").hasAnyRole("SPONSORS", "ADMIN")
-                        .requestMatchers("/auth/donations/**").hasAnyRole("SPONSORS")
+                                .requestMatchers("/INDIVIDUAL/**").hasRole("INDIVIDUAL")
+                                .requestMatchers("/SPONSORS/**").hasAnyRole("SPONSORS", "ADMIN")
+                                .requestMatchers("/auth/donations/**").hasAnyRole("SPONSORS")
 
-                        // Everything else requires authentication
-                        .anyRequest().authenticated()
+                                // Everything else requires authentication
+                                .anyRequest().authenticated()
                 )
                 // Make sure JWT filter is only applied after public endpoints are bypassed
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
@@ -119,7 +118,7 @@ public class CorsConfig {
                 );
 
         return http.build();
-    
+    }
     @Bean
         public AuthenticationManager authenticationManager(HttpSecurity http) throws Exception {
             AuthenticationManagerBuilder authBuilder = http.getSharedObject(AuthenticationManagerBuilder.class);
