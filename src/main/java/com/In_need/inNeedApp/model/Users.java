@@ -32,6 +32,15 @@ public class Users {
     @Column(name = "username")
     private String username;
 
+    @Column(name = "bio")
+    private String bio;
+    @Column(name = "profile")
+    private String profileImagePath;
+
+    // Optional: If you have a location object
+    @Embedded
+    private Location location;
+
 //    @Column(name = "verification_token")
 //    private String verificationToken;
 

@@ -1,28 +1,25 @@
 package com.In_need.inNeedApp.controller;
 
-import com.In_need.inNeedApp.dto.sponsorRequest;
-import com.In_need.inNeedApp.model.sponsor_request;
-import com.In_need.inNeedApp.services.SponsorRequestService;
+import com.In_need.inNeedApp.model.individual_request;
+import com.In_need.inNeedApp.services.IndividualService;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.nio.file.*;
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/sponsor-requests")
+@RequestMapping("/api/individual-requests")
 @CrossOrigin(origins = "http://localhost:4200")
-public class sponsor_requestController {
+public class IndividualreqController {
 
-    private final SponsorRequestService sponsorRequestService;
-    private final Path uploadDir = Paths.get("uploads");
+        private final IndividualService individualRequestService;
+    private final Path uploadDir = Paths.get("uploads/individual");
 
-    public sponsor_requestController(SponsorRequestService sponsorRequestService) {
-        this.sponsorRequestService = sponsorRequestService;
+    public IndividualreqController(IndividualService individualRequestService) {
+        this.individualRequestService = individualRequestService;
 
         try {
             Files.createDirectories(uploadDir);
@@ -32,7 +29,7 @@ public class sponsor_requestController {
     }
 
     @PostMapping(consumes = {"multipart/form-data", "application/json"})
-    public ResponseEntity<sponsor_request> createRequest(@RequestBody sponsor_request request, List<MultipartFile> mediaFiles) {
+    public ResponseEntity<individual_request> createRequest(@RequestBody individual_request request, List<MultipartFile> mediaFiles) {
 
         List<String> mediaUrls = new ArrayList<>();
 
@@ -46,14 +43,12 @@ public class sponsor_requestController {
                 }
             }
 
+            // You might want to set these URLs in the request object
+            // request.setMediaUrls(mediaUrls);
 
+            individual_request saved = individualRequestService.save(request);
+            return ResponseEntity.ok(saved);
 
-            request.setMediaUrls(mediaUrls); // assuming your model has this field
-
-            // Save using your service
-            sponsor_request savedRequest = sponsorRequestService.saveSponsorRequest(request);
-
-            return ResponseEntity.ok(savedRequest);
         } catch (Exception e) {
             e.printStackTrace();
             return ResponseEntity.badRequest().build();
@@ -61,7 +56,7 @@ public class sponsor_requestController {
     }
 
     @GetMapping
-    public List<sponsor_request> getAll() {
-        return sponsorRequestService.getAll();
+    public List<individual_request> getAll() {
+        return individualRequestService.getAll();
     }
 }

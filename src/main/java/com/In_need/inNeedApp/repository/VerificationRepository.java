@@ -30,4 +30,7 @@ public interface VerificationRepository extends JpaRepository<Verification, Long
 
     @Query("SELECT v FROM Verification v LEFT JOIN FETCH v.documents WHERE v.id = :id")
     Optional<Verification> findByIdWithDocuments(@Param("id") Long id);
+
+    Optional<Verification> findByUserId(Long id);
+    Optional<Verification> findByUserIdAndStatus(Long userId, Status status);
 }
