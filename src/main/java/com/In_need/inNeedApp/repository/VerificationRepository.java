@@ -1,5 +1,6 @@
 package com.In_need.inNeedApp.repository;
 
+import com.In_need.inNeedApp.constant.Status;
 import com.In_need.inNeedApp.model.Verification;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -21,9 +22,15 @@ public interface VerificationRepository extends JpaRepository<Verification, Long
     // Check if phone exists
     boolean existsByPhoneNumber(String phoneNumber);
 
+    List<Verification> findByStatus(Status status);
+    List<Verification> findAllByStatus(Status status);
+
     // Search all by partial website match
     //List<Verification> findByWebsiteContainingIgnoreCase(String keyword);
 
     @Query("SELECT v FROM Verification v LEFT JOIN FETCH v.documents WHERE v.id = :id")
     Optional<Verification> findByIdWithDocuments(@Param("id") Long id);
+
+    Optional<Verification> findByUserId(Long id);
+    Optional<Verification> findByUserIdAndStatus(Long userId, Status status);
 }

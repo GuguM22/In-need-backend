@@ -68,5 +68,7 @@ public class JwtUtils {
                 .getBody();
         return claims.getExpiration();
     }
-
+    public String getSecret() {
+        return secret;
+    }
 }

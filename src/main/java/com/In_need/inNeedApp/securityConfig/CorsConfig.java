@@ -4,6 +4,8 @@ import com.In_need.inNeedApp.services.CustomUserDetailsService;
 import com.In_need.inNeedApp.services.TokenBlacklistService;
 import com.In_need.inNeedApp.utils.JwtAuthenticationFilter;
 import com.In_need.inNeedApp.utils.JwtUtils;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -23,6 +25,7 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
+import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import java.util.List;
@@ -50,6 +53,18 @@ public class CorsConfig {
 //            };
 //        }
 
+
+
+    @Configuration
+    public class WebConfig implements WebMvcConfigurer {
+
+        @Override
+        public void addResourceHandlers(ResourceHandlerRegistry registry) {
+            registry.addResourceHandler("/auth/images/**")
+                    .addResourceLocations("file:uploads/");
+        }
+    }
+
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http, JwtAuthenticationFilter jwtAuthenticationFilter) throws Exception {
         http
@@ -63,14 +78,31 @@ public class CorsConfig {
                                 "/auth/forgot-password",
                                 "/auth/reset-password",
                                 "/auth/logout",
+                                "/auth/upload-profile-image",
+                                "/auth/profile",
                                 "/api/verify/verification",
                                 "/api/verify/upload",
+
                                 "/api/individual-requests"   // exact match
                             // allow all subpaths
 
-                        ).permitAll()
+               
 
                         // Role-based endpoints
+
+ 
+                                //"/api/verify/exists/phone/**",
+                                "/api/verify/verified"
+ 
+                                "/api/verify/download/**",
+                                "/documents/**"
+ 
+                        ).permitAll()
+                        .requestMatchers("/auth/images/**").permitAll()
+                        .requestMatchers("/api/verify/exists/phone/**").permitAll()
+                        .requestMatchers("/api/verify/verification/status/**").permitAll()
+                        .requestMatchers("/auth/profile").authenticated()
+
                         .requestMatchers("/ADMIN/**").hasRole("ADMIN")
 //                        .requestMatchers("/ORGANIZATION/**").hasRole("ORGANIZATION")
                         .requestMatchers("/INDIVIDUAL/**").hasRole("INDIVIDUAL")
@@ -87,11 +119,7 @@ public class CorsConfig {
                 );
 
         return http.build();
-    }
-
-
-
-
+    
     @Bean
         public AuthenticationManager authenticationManager(HttpSecurity http) throws Exception {
             AuthenticationManagerBuilder authBuilder = http.getSharedObject(AuthenticationManagerBuilder.class);
@@ -136,7 +164,7 @@ public class CorsConfig {
             // Indicates which HTTP methods from the permitted origins are permitted.
             //  Requests such as GET, POST, PUT, DELETE, and OPTIONS are supported.
             // Requests made with methods not on this list will be rejected.
-            configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+            configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
             // Gives the frontend permission to include specific headers in the request.
             //  All headers are permitted when "*" is used.
             //  Both default and custom headers (such as Authorization, Content-Type, etc.) can be sent by the frontend.
