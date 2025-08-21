@@ -96,7 +96,8 @@ public class CorsConfig {
 
                                         "/api/verify/download/**",
                                         "/documents/**",
-                                        "/auth/donations/post"
+                                        "/auth/donations/post",
+                                        "/auth/donations/details"
 
                                 ).permitAll()
                                 .requestMatchers("/auth/images/**").permitAll()
