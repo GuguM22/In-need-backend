@@ -1,5 +1,6 @@
 package com.In_need.inNeedApp.controller;
 import com.In_need.inNeedApp.dto.DonationRequest;
+import com.In_need.inNeedApp.dto.DonationUpdate;
 import com.In_need.inNeedApp.model.Donation;
 import com.In_need.inNeedApp.model.Users;
 import com.In_need.inNeedApp.repository.UserRepository;
@@ -35,6 +36,12 @@ public class DonationController {
         Users user = userOpt.get();
         Donation savedDonation = donationService.createDonation(request, user);
         return ResponseEntity.status(HttpStatus.CREATED).body(savedDonation);
+    }
+
+    @PutMapping("/update")
+    public ResponseEntity<?> updateDonation(@RequestBody DonationUpdate donationUpdate) {
+        Donation updatedDonation = donationService.updateDonation(donationUpdate);
+        return ResponseEntity.status(HttpStatus.OK).body(updatedDonation);
     }
 
     @GetMapping("/{email}")

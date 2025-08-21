@@ -55,6 +55,8 @@ public class Donation {
     @JsonFormat(pattern = "HH:mm")
     private LocalDateTime createdAt;
 
+    private Boolean isAccepted;
+
     @ManyToOne
     @JoinColumn(name = "sponsor_request_id")
     private sponsor_request sponsorRequest;
