@@ -42,6 +42,9 @@ public class DonationRequest {
 
     private LocalDateTime createdAt;
 
+    private String profileImageUrl;
+
+    private String donorName;
     public String getTimeAgo() {
         Duration duration = Duration.between(createdAt, LocalDateTime.now());
 

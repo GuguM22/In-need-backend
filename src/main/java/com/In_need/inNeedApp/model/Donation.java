@@ -20,36 +20,42 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class Donation {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+        @Id
+        @GeneratedValue(strategy = GenerationType.IDENTITY)
+        private Long id;
 
-    @Column(nullable = false)
-    private String description;
+        @Column(nullable = false)
+        private String description;
 
-    @Column(nullable = false)
-    private int quantity;
+        @Column(nullable = false)
+        private int quantity;
 
-    @Column(nullable = false)
-    private String availability;
+        @Column(nullable = false)
+        private String availability;
 
-    @Column(name = "additional_notes", nullable = false)
-    private String additionalNotes;
+        @Column(name = "additional_notes", nullable = false)
+        private String additionalNotes;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "logistic_preference", nullable = false)
-    private LogisticPreference preference;
+        @Enumerated(EnumType.STRING)
+        @Column(name = "logistic_preference", nullable = false)
+        private LogisticPreference preference;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "donation_type", nullable = false)
-    private DonationType type;
+        @Enumerated(EnumType.STRING)
+        @Column(name = "donation_type", nullable = false)
+        private DonationType type;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "donation_frequency", nullable = false)
-    private DonationFrequency frequency;
+        @Enumerated(EnumType.STRING)
+        @Column(name = "donation_frequency", nullable = false)
+        private DonationFrequency frequency;
+
+        @Column(name = "profile_image")
+         private String profileImageUrl;
 
     @Column(name = "donor_email", nullable = false)
     private String donorEmail;
+
+    @Column(name = "donor_name")
+    private String donorName;
 
     @Column(name = "createdAt")
     @JsonFormat(pattern = "HH:mm")

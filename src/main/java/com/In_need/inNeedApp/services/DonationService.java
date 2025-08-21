@@ -24,11 +24,12 @@ public class DonationService {
         donation.setDescription(request.getDescription());
         donation.setQuantity(request.getQuantity());
         donation.setAvailability(request.getAvailability());
-        donation.setAdditionalNotes(request.getAdditionalNotes()); // Fixed typo
+        donation.setAdditionalNotes(request.getAdditionalNotes());
         donation.setPreference(request.getPreference());
         donation.setFrequency(request.getFrequency());
 
-        donation.setDonorEmail(user.getEmail()); // from verified user
+        donation.setDonorEmail(user.getEmail());
+        donation.setDonorName(request.getDonorName());
         donation.setCreatedAt(LocalDateTime.now());
 
         return donationRepository.save(donation);
@@ -36,5 +37,9 @@ public class DonationService {
 
     public List<Donation> getDonationsByEmail(String donorEmail) {
         return donationRepository.findByDonorEmailIgnoreCase(donorEmail);
+    }
+
+    public List<Donation> getDonations() {
+        return donationRepository.findAll();
     }
 }
