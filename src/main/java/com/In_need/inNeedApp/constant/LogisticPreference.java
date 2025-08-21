@@ -14,9 +14,9 @@ public enum LogisticPreference {
      */
     @JsonCreator
     public static LogisticPreference fromString(String key) {
-        // Handle null input gracefully
         if (key == null) return null;
-        // Convert input to uppercase to match enum names
-        return LogisticPreference.valueOf(key.toUpperCase());
+        String normalized = key.trim().toUpperCase().replace("-", "_").replace(" ", "_");
+        return LogisticPreference.valueOf(normalized);
     }
+
 }

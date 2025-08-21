@@ -11,21 +11,19 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.Optional;
 
+@CrossOrigin(origins = "http://localhost:4200")
 @RestController
 @RequestMapping("/auth/donations")
-@CrossOrigin(origins = "http://localhost:4200")
 public class DonationController {
-
     private final DonationService donationService;
     private final UserRepository userRepository;
-
 
     public DonationController(DonationService donationService, UserRepository userRepository) {
         this.donationService = donationService;
         this.userRepository = userRepository;
     }
 
-    @PostMapping
+    @PostMapping("/post")
     public ResponseEntity<?> createDonation(@RequestBody @Valid DonationRequest request) {
         Optional<Users> userOpt = userRepository.findByEmailIgnoreCase(request.getDonorEmail());
 
