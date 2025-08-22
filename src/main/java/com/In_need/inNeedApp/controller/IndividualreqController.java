@@ -100,7 +100,8 @@ public class IndividualreqController {
                 Path filePath = uploadDir.resolve(filename);
                 try {
                     Files.copy(file.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
-                    mediaUrls.add(filePath.toString());
+                    mediaUrls.add("individual/" + filename);
+
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
