@@ -1,8 +1,14 @@
 package com.In_need.inNeedApp.controller;
+import com.In_need.inNeedApp.constant.DonationStatus;
 import com.In_need.inNeedApp.dto.DonationRequest;
+ 
+import com.In_need.inNeedApp.dto.DonationUpdateRequest;
+ 
 import com.In_need.inNeedApp.dto.DonationUpdate;
+ 
 import com.In_need.inNeedApp.model.Donation;
 import com.In_need.inNeedApp.model.Users;
+import com.In_need.inNeedApp.repository.DonationRepository;
 import com.In_need.inNeedApp.repository.UserRepository;
 import com.In_need.inNeedApp.services.DonationService;
 import jakarta.validation.Valid;
@@ -23,10 +29,14 @@ import java.util.stream.Collectors;
 public class DonationController {
     private final DonationService donationService;
     private final UserRepository userRepository;
+    private final DonationRepository donationRepository;
 
-    public DonationController(DonationService donationService, UserRepository userRepository) {
+    public DonationController(DonationService donationService,
+                              UserRepository userRepository,
+                              DonationRepository donationRepository) {
         this.donationService = donationService;
         this.userRepository = userRepository;
+        this.donationRepository = donationRepository;
     }
 
     @PostMapping("/post")
@@ -43,6 +53,9 @@ public class DonationController {
         return ResponseEntity.status(HttpStatus.CREATED).body(savedDonation);
     }
 
+ 
+   /* @GetMapping("/{email}")
+ 
     @PutMapping("/update")
     public ResponseEntity<?> updateDonation(@RequestBody DonationUpdate donationUpdate) {
         Donation updatedDonation = donationService.updateDonation(donationUpdate);
@@ -50,30 +63,35 @@ public class DonationController {
     }
 
     @GetMapping("/{email}")
+ 
     public ResponseEntity<?> getDonationsByEmail(@PathVariable("email") String email) {
-        List<Donation> donations = donationService.getDonationsByEmail(email);
+        List<DonationRequest> donations = donationService.getDonationsByEmail(email);
         if (donations.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body("No donations found for email: " + email);
         }
         return ResponseEntity.ok(donations);
-    }
+    }*/
 
     @GetMapping("/details")
     public ResponseEntity<List<DonationRequest>> getAllDonations() {
-        List<Donation> donations = donationService.getDonations();
+        List<Donation> donations = donationService.getPendingDonations(); // only pending
         List<DonationRequest> dtoList = donations.stream().map(d -> {
             DonationRequest dto = new DonationRequest();
             BeanUtils.copyProperties(d, dto);
 
-            Optional<Users> userOpt = userRepository.findByEmailIgnoreCase(d.getDonorEmail());
-            userOpt.ifPresent(user -> dto.setProfileImageUrl(user.getProfileImagePath()));
+            userRepository.findByEmailIgnoreCase(d.getDonorEmail())
+                    .ifPresent(user -> {
+                        dto.setDonorName(user.getUsername());
+                        dto.setProfileImageUrl(user.getProfileImageUrl());
+                    });
 
             return dto;
         }).collect(Collectors.toList());
 
         return ResponseEntity.ok(dtoList);
     }
+
     @GetMapping("/donations/details")
     public List<DonationRequest> getDonations() {
         return donationService.getDonations()
@@ -88,6 +106,31 @@ public class DonationController {
                     return dto;
                 })
                 .toList();
+    }
+
+   /* @GetMapping("/pending")
+    public List<Donation> getPendingDonations() {
+        return donationRepository.findByStatus(DonationStatus.PENDING);
+    }*/
+    @GetMapping("/pending")
+    public List<Donation> getPendingDonations() {
+        return donationService.getDonationsByStatus(DonationStatus.PENDING);
+    }
+
+    @GetMapping("/accepted")
+    public List<Donation> getAcceptedDonations() {
+        return donationService.getDonationsByStatus(DonationStatus.ACCEPTED);
+    }
+
+    @GetMapping("/declined")
+    public List<Donation> getDeclinedDonations() {
+        return donationService.getDonationsByStatus(DonationStatus.DECLINED);
+    }
+
+    @PutMapping("/update")
+    public ResponseEntity<?> updateDonation(@RequestBody DonationUpdateRequest request) {
+        Donation updated = donationService.updateDonationStatus(request.getId(), request.getStatus());
+        return ResponseEntity.ok(updated);
     }
 
 

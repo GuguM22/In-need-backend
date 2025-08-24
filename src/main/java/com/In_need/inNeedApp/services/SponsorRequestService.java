@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class SponsorRequestService {
@@ -22,8 +23,6 @@ private sponsor_requestRepository sponsor_requestRepository;  // instance, not c
     public List<sponsor_request> getAll() {
         return sponsor_requestRepository.findAll();
     }
-
-
 
 }
 

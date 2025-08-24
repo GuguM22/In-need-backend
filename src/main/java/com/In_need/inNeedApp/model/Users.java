@@ -35,7 +35,7 @@ public class Users {
     @Column(name = "bio")
     private String bio;
     @Column(name = "profile")
-    private String profileImagePath;
+    private String profileImageUrl;
 
     // Optional: If you have a location object
     @Embedded
