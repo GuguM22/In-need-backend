@@ -65,4 +65,5 @@ public class sponsor_requestController {
     public List<sponsor_request> getAll() {
         return sponsorRequestService.getAll();
     }
+
 }

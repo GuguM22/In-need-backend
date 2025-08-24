@@ -14,7 +14,6 @@ import java.time.LocalDateTime;
 
 @Data
 public class DonationRequest {
-
     @NotBlank(message = "Description is required")
     private String description;
 

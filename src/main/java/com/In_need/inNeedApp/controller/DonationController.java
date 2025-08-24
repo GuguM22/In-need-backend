@@ -1,7 +1,11 @@
 package com.In_need.inNeedApp.controller;
 import com.In_need.inNeedApp.constant.DonationStatus;
 import com.In_need.inNeedApp.dto.DonationRequest;
+ 
 import com.In_need.inNeedApp.dto.DonationUpdateRequest;
+ 
+import com.In_need.inNeedApp.dto.DonationUpdate;
+ 
 import com.In_need.inNeedApp.model.Donation;
 import com.In_need.inNeedApp.model.Users;
 import com.In_need.inNeedApp.repository.DonationRepository;
@@ -49,7 +53,17 @@ public class DonationController {
         return ResponseEntity.status(HttpStatus.CREATED).body(savedDonation);
     }
 
+ 
    /* @GetMapping("/{email}")
+ 
+    @PutMapping("/update")
+    public ResponseEntity<?> updateDonation(@RequestBody DonationUpdate donationUpdate) {
+        Donation updatedDonation = donationService.updateDonation(donationUpdate);
+        return ResponseEntity.status(HttpStatus.OK).body(updatedDonation);
+    }
+
+    @GetMapping("/{email}")
+ 
     public ResponseEntity<?> getDonationsByEmail(@PathVariable("email") String email) {
         List<DonationRequest> donations = donationService.getDonationsByEmail(email);
         if (donations.isEmpty()) {
