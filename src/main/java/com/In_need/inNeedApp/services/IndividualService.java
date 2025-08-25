@@ -11,8 +11,9 @@ import java.util.List;
 public class IndividualService {
 
     private IndividualRepository repository;
+
     @Autowired
-    public void IndividualRequestService(IndividualRepository repository) {
+    public void IndividualService(IndividualRepository repository) {
         this.repository = repository;
     }
 
@@ -26,6 +27,23 @@ public class IndividualService {
 
     public individual_request getById(Long id) {
         return repository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Individual request not found"));
+                .orElseThrow(() -> new RuntimeException("Individual request not found" + id));
     }
+
+    public individual_request update(Long id, individual_request updatedRequest) {
+        individual_request existing = repository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Individual request not found: " + id));
+
+        // Update the fields
+        existing.setTitle(updatedRequest.getTitle());
+        existing.setUrgency(updatedRequest.getUrgency());
+        existing.setQuantity(updatedRequest.getQuantity());
+        existing.setNeededByDate(updatedRequest.getNeededByDate());
+        existing.setDescription(updatedRequest.getDescription());
+        existing.setMediaUrls(updatedRequest.getMediaUrls());
+
+        // Save the updated entity
+        return repository.save(existing); // <-- return statement added
+    }
+
 }

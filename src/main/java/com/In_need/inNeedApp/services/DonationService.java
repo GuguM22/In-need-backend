@@ -2,6 +2,7 @@ package com.In_need.inNeedApp.services;
 
 import com.In_need.inNeedApp.constant.DonationStatus;
 import com.In_need.inNeedApp.dto.DonationRequest;
+import com.In_need.inNeedApp.dto.DonationUpdate;
 import com.In_need.inNeedApp.model.Donation;
 import com.In_need.inNeedApp.model.Users;
 import com.In_need.inNeedApp.repository.DonationRepository;
@@ -41,7 +42,21 @@ public class DonationService {
         return donationRepository.save(donation);
     }
 
+ 
    /* public List<Donation> getDonationsByEmail(String donorEmail) {
+ 
+    public Donation updateDonation(DonationUpdate donationUpdate) {
+        Donation donation = donationRepository.findById(donationUpdate.getId())
+                .orElseThrow(() -> new RuntimeException("Donation not found"));
+
+        donation.setIsAccepted(donationUpdate.getIsAccepted());
+
+        return donationRepository.save(donation);
+    }
+
+
+    public List<Donation> getDonationsByEmail(String donorEmail) {
+ 
         return donationRepository.findByDonorEmailIgnoreCase(donorEmail);
     }*/
 
