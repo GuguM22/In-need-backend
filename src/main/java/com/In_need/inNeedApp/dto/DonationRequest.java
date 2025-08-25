@@ -15,6 +15,9 @@ import java.time.LocalDateTime;
 
 @Data
 public class DonationRequest {
+    @NotNull(message = "Donation ID must not be null")
+    private Long id;
+
     @NotBlank(message = "Description is required")
     private String description;
 

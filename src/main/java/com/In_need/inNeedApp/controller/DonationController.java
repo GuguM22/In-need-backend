@@ -122,6 +122,10 @@ public class DonationController {
            DonationRequest dto = new DonationRequest();
            BeanUtils.copyProperties(d, dto);
 
+           // Explicitly set ID
+           dto.setId(d.getId());
+
+           // Map user details
            userRepository.findByEmailIgnoreCase(d.getDonorEmail())
                    .ifPresent(user -> {
                        dto.setDonorName(capitalizeWords(user.getUsername()));
@@ -135,6 +139,7 @@ public class DonationController {
        return ResponseEntity.ok(dtoList);
    }
 
+
     @GetMapping("/accepted")
     public List<Donation> getAcceptedDonations() {
         return donationService.getDonationsByStatus(DonationStatus.ACCEPTED);
@@ -147,9 +152,16 @@ public class DonationController {
 
     @PutMapping("/update")
     public ResponseEntity<?> updateDonation(@RequestBody DonationUpdateRequest request) {
+        if (request.getId() == null) {
+            return ResponseEntity
+                    .badRequest()
+                    .body("Donation ID must not be null");
+        }
+
         Donation updated = donationService.updateDonationStatus(request.getId(), request.getStatus());
         return ResponseEntity.ok(updated);
     }
+
 
     private String capitalizeWords(String input) {
         if (input == null || input.isBlank()) {
