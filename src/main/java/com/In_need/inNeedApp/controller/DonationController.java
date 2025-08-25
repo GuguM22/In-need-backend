@@ -15,6 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -68,7 +69,8 @@ public class DonationController {
 
             userRepository.findByEmailIgnoreCase(d.getDonorEmail())
                     .ifPresent(user -> {
-                        dto.setDonorName(user.getUsername());
+                        dto.setDonorName(capitalizeWords(user.getUsername()));
+                        dto.setDonorRole(user.getRole());
                         dto.setProfileImageUrl(user.getProfileImageUrl());
                     });
 
@@ -86,8 +88,8 @@ public class DonationController {
                     DonationRequest dto = new DonationRequest();
                    // dto.set(donation.getId());
                     dto.setDescription(donation.getDescription());
-                    dto.setDonorEmail(donation.getDonorEmail());
-                    dto.setDonorName(donation.getDonorName());
+                    dto.setDonorEmail(capitalizeWords(donation.getDonorEmail()));
+                    dto.setDonorName(capitalizeWords(donation.getDonorName()));
                     dto.setProfileImageUrl(donation.getProfileImageUrl());
                     return dto;
                 })
@@ -98,10 +100,26 @@ public class DonationController {
     public List<Donation> getPendingDonations() {
         return donationRepository.findByStatus(DonationStatus.PENDING);
     }*/
-    @GetMapping("/pending")
-    public List<Donation> getPendingDonations() {
-        return donationService.getDonationsByStatus(DonationStatus.PENDING);
-    }
+   @GetMapping("/pending")
+   public ResponseEntity<List<DonationRequest>> getPendingDonations() {
+       List<Donation> donations = donationService.getDonationsByStatus(DonationStatus.PENDING);
+
+       List<DonationRequest> dtoList = donations.stream().map(d -> {
+           DonationRequest dto = new DonationRequest();
+           BeanUtils.copyProperties(d, dto);
+
+           userRepository.findByEmailIgnoreCase(d.getDonorEmail())
+                   .ifPresent(user -> {
+                       dto.setDonorName(capitalizeWords(user.getUsername()));
+                       dto.setDonorRole(user.getRole());
+                       dto.setProfileImageUrl(user.getProfileImageUrl());
+                   });
+
+           return dto;
+       }).collect(Collectors.toList());
+
+       return ResponseEntity.ok(dtoList);
+   }
 
     @GetMapping("/accepted")
     public List<Donation> getAcceptedDonations() {
@@ -119,5 +137,21 @@ public class DonationController {
         return ResponseEntity.ok(updated);
     }
 
+    private String capitalizeWords(String input) {
+        if (input == null || input.isBlank()) {
+            return input;
+        }
+        return Arrays.stream(input.trim().split("\\s+"))
+                .filter(word -> !word.isEmpty())
+                .map(word -> Character.toUpperCase(word.charAt(0)) + word.substring(1).toLowerCase())
+                .collect(Collectors.joining(" "));
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<Donation> getDonationById(@PathVariable Long id) {
+        return donationService.findById(id)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
 
 }

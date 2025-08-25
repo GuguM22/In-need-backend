@@ -98,7 +98,8 @@ public class CorsConfig {
                                         "/auth/donations/post",
                                         "/auth/donations/details",
                                         "/auth/donations/pending",
-                                        "/auth/donations/update"
+                                        "/auth/donations/update",
+                                        "/auth/donations/{id}"
 
                                 ).permitAll()
                                 .requestMatchers("/auth/images/**").permitAll()
@@ -110,7 +111,7 @@ public class CorsConfig {
 //                        .requestMatchers("/ORGANIZATION/**").hasRole("ORGANIZATION")
                                 .requestMatchers("/INDIVIDUAL/**").hasRole("INDIVIDUAL")
                                 .requestMatchers("/SPONSORS/**").hasAnyRole("SPONSORS", "ADMIN")
-                                .requestMatchers("/auth/donations/**").hasAnyRole("SPONSORS")
+                                .requestMatchers("/auth/donations/**").hasAnyRole("SPONSORS", "INDIVIDUAL")
 
                                 // Everything else requires authentication
                                 .anyRequest().authenticated()

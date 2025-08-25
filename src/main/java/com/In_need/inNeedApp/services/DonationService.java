@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -33,6 +34,7 @@ public class DonationService {
 
         donation.setDonorEmail(user.getEmail());
         donation.setDonorName(user.getUsername());
+        donation.setDonorRole(user.getRole());
         donation.setProfileImageUrl(user.getProfileImageUrl());
         donation.setCreatedAt(LocalDateTime.now());
 
@@ -77,6 +79,7 @@ public class DonationService {
             dto.setFrequency(d.getFrequency());
             dto.setDonorEmail(d.getDonorEmail());
             dto.setDonorName(d.getDonorName());
+            dto.setDonorRole(d.getDonorRole());
             dto.setProfileImageUrl(d.getProfileImageUrl());
             dto.setCreatedAt(d.getCreatedAt());
             return dto;
@@ -86,6 +89,10 @@ public class DonationService {
     // in DonationService
     public List<Donation> getPendingDonations() {
         return donationRepository.findByStatus(DonationStatus.PENDING);
+    }
+
+    public Optional<Donation> findById(Long id) {
+        return donationRepository.findById(id);
     }
 
 }
