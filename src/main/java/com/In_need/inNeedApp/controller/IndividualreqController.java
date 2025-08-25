@@ -77,7 +77,7 @@ public class IndividualreqController {
 
     @PutMapping(value = "/{id}", consumes = "multipart/form-data")
     public ResponseEntity<individual_request> updateRequest(
-            @PathVariable Long id,
+            @PathVariable Long id,it
             @RequestParam("title") String title,
             @RequestParam(value = "urgency", required = false) String urgency,
             @RequestParam("quantity") int quantity,

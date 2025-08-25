@@ -13,6 +13,10 @@ public class sponsorRequest {private String title;
     private String description;
     private List<MultipartFile> media;
 
+    private List<String> mediaUrls;
+    public List<String> getMediaUrls() { return mediaUrls; }
+    public void setMediaUrls(List<String> mediaUrls) { this.mediaUrls = mediaUrls; }
+
     // Getters and setters
     public String getTitle() { return title; }
     public void setTitle(String title) { this.title = title; }
