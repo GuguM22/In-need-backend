@@ -48,7 +48,6 @@ public class sponsor_requestController {
             }
 
 
-
             request.setMediaUrls(mediaUrls); // assuming your model has this field
 
             // Save using your service
@@ -65,5 +64,35 @@ public class sponsor_requestController {
     public List<sponsor_request> getAll() {
         return sponsorRequestService.getAll();
     }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<sponsor_request> updateRequest(
+            @PathVariable Long id,
+            @ModelAttribute sponsorRequest request,
+            @RequestParam(value = "mediaFiles", required = false) List<MultipartFile> mediaFiles) {
+
+        List<String> mediaUrls = new ArrayList<>();
+
+        try {
+            if (mediaFiles != null) {
+                for (MultipartFile file : mediaFiles) {
+                    String filename = System.currentTimeMillis() + "_" + file.getOriginalFilename();
+                    Path filePath = uploadDir.resolve(filename);
+                    Files.copy(file.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
+                    mediaUrls.add(filePath.toString());
+                }
+            }
+
+            request.setMediaUrls(mediaUrls);
+
+            sponsor_request updatedRequest = sponsorRequestService.updateSponsorRequest(id, request);
+
+            return ResponseEntity.ok(updatedRequest);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.badRequest().build();
+        }
+    }
+
 
 }
