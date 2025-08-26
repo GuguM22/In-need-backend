@@ -1,7 +1,9 @@
 package com.In_need.inNeedApp.controller;
 
 import com.In_need.inNeedApp.model.individual_request;
+import com.In_need.inNeedApp.repository.IndividualRepository;
 import com.In_need.inNeedApp.services.IndividualService;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -17,10 +19,12 @@ import java.util.List;
 public class IndividualreqController {
 
     private final IndividualService individualService;
+    private final IndividualRepository individualRepository;
     private final Path uploadDir = Paths.get("uploads/individual");
 
-    public IndividualreqController(IndividualService individualService) {
+    public IndividualreqController(IndividualService individualService, IndividualRepository individualRepository) {
         this.individualService = individualService;
+        this.individualRepository = individualRepository;
 
         try {
             Files.createDirectories(uploadDir);
@@ -66,7 +70,8 @@ public class IndividualreqController {
 
     @GetMapping
     public List<individual_request> getAll() {
-        return individualService.getAll();
+        return individualRepository.findAll(Sort.by(Sort.Direction.DESC, "createdAt"));
+
     }
 
     @GetMapping("/{id}")

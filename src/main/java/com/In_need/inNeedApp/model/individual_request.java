@@ -1,7 +1,10 @@
 package com.In_need.inNeedApp.model;
 
 import jakarta.persistence.*;
+import org.hibernate.annotations.CreationTimestamp;
+
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Entity
@@ -28,6 +31,8 @@ public class individual_request {
     @Column(name = "media_url")
     private List<String> mediaUrls;
 
+    @CreationTimestamp
+    private LocalDateTime createdAt;
     // Constructors
     public individual_request() { }
 
@@ -61,4 +66,11 @@ public class individual_request {
 
     public List<String> getMediaUrls() { return mediaUrls; }
     public void setMediaUrls(List<String> mediaUrls) { this.mediaUrls = mediaUrls; }
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
+    }
 }
