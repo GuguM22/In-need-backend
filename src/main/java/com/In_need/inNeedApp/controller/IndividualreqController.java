@@ -1,10 +1,15 @@
 package com.In_need.inNeedApp.controller;
 
+import com.In_need.inNeedApp.dto.IndividualRequestDTO;
+import com.In_need.inNeedApp.model.Users;
 import com.In_need.inNeedApp.model.individual_request;
 import com.In_need.inNeedApp.repository.IndividualRepository;
+import com.In_need.inNeedApp.repository.UserRepository;
 import com.In_need.inNeedApp.services.IndividualService;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -17,14 +22,15 @@ import java.util.List;
 @RequestMapping("/api/individual-requests")
 @CrossOrigin(origins = "http://localhost:4200")
 public class IndividualreqController {
-
+    private final UserRepository userRepository;
     private final IndividualService individualService;
     private final IndividualRepository individualRepository;
     private final Path uploadDir = Paths.get("uploads/individual");
 
-    public IndividualreqController(IndividualService individualService, IndividualRepository individualRepository) {
+    public IndividualreqController(IndividualService individualService, IndividualRepository individualRepository, UserRepository userRepository) {
         this.individualService = individualService;
         this.individualRepository = individualRepository;
+        this.userRepository = userRepository;
 
         try {
             Files.createDirectories(uploadDir);
@@ -32,6 +38,41 @@ public class IndividualreqController {
             throw new RuntimeException("Could not create upload directory", e);
         }
     }
+
+//    @PostMapping(consumes = "multipart/form-data")
+//    public ResponseEntity<individual_request> createRequest(
+//            @RequestParam("title") String title,
+//            @RequestParam(value = "urgency", required = false) String urgency,
+//            @RequestParam("quantity") int quantity,
+//            @RequestParam("neededByDate") String neededByDate,
+//            @RequestParam("description") String description,
+//            @RequestParam(value = "mediaFiles", required = false) List<MultipartFile> mediaFiles
+//    ) {
+//        individual_request request = new individual_request();
+//        request.setTitle(title);
+//        request.setUrgency(urgency);
+//        request.setQuantity(quantity);
+//        request.setNeededByDate(LocalDate.parse(neededByDate));
+//        request.setDescription(description);
+//
+//        List<String> mediaUrls = new ArrayList<>();
+//        if (mediaFiles != null) {
+//            for (MultipartFile file : mediaFiles) {
+//                String filename = System.currentTimeMillis() + "_" + file.getOriginalFilename();
+//                Path filePath = uploadDir.resolve(filename);
+//                try {
+//                    Files.copy(file.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
+//                    mediaUrls.add(filePath.toString());
+//                } catch (Exception e) {
+//                    e.printStackTrace();
+//                }
+//            }
+//        }
+//        request.setMediaUrls(mediaUrls);
+//
+//        individual_request saved = individualService.save(request);
+//        return ResponseEntity.ok(saved);
+//    }
 
     @PostMapping(consumes = "multipart/form-data")
     public ResponseEntity<individual_request> createRequest(
@@ -49,6 +90,7 @@ public class IndividualreqController {
         request.setNeededByDate(LocalDate.parse(neededByDate));
         request.setDescription(description);
 
+        // Media files
         List<String> mediaUrls = new ArrayList<>();
         if (mediaFiles != null) {
             for (MultipartFile file : mediaFiles) {
@@ -64,15 +106,47 @@ public class IndividualreqController {
         }
         request.setMediaUrls(mediaUrls);
 
+        // 🔑 Get logged-in user
+        String email = null;
+        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
+        if (principal instanceof UserDetails) {
+            email = ((UserDetails) principal).getUsername();
+        } else {
+            email = principal.toString();
+        }
+
+        Users user = userRepository.findByEmailIgnoreCase(email)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        request.setUser(user); // 👈 This is essential
+
         individual_request saved = individualService.save(request);
         return ResponseEntity.ok(saved);
     }
 
-    @GetMapping
-    public List<individual_request> getAll() {
-        return individualRepository.findAll(Sort.by(Sort.Direction.DESC, "createdAt"));
 
-    }
+    //    @GetMapping
+//    public List<individual_request> getAll() {
+//        return individualRepository.findAll(Sort.by(Sort.Direction.DESC, "createdAt"));
+//
+//    }
+@GetMapping
+public List<IndividualRequestDTO> getAll() {
+    List<individual_request> requests = individualRepository.findAll(Sort.by(Sort.Direction.DESC, "createdAt"));
+    return requests.stream().map(req -> {
+        IndividualRequestDTO dto = new IndividualRequestDTO();
+        dto.setId(req.getId());
+        dto.setTitle(req.getTitle());
+        dto.setUrgency(req.getUrgency());
+        dto.setQuantity(req.getQuantity());
+        dto.setNeededByDate(req.getNeededByDate());
+        dto.setDescription(req.getDescription());
+        dto.setMediaUrls(req.getMediaUrls());
+        dto.setUsername(req.getUser() != null ? req.getUser().getUsername() : "Anonymous");
+        return dto;
+    }).toList();
+}
+
 
     @GetMapping("/{id}")
     public ResponseEntity<individual_request> getById(@PathVariable Long id) {
