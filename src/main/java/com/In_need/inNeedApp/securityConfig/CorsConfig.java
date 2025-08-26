@@ -60,8 +60,9 @@ public class CorsConfig {
 
         @Override
         public void addResourceHandlers(ResourceHandlerRegistry registry) {
-            registry.addResourceHandler("/auth/images/**")
+            registry.addResourceHandler("/uploads/**")
                     .addResourceLocations("file:uploads/");
+
         }
     }
 
@@ -83,6 +84,7 @@ public class CorsConfig {
                                         "/api/verify/verification",
                                         "/api/verify/upload",
 
+
                                         "/api/individual-requests",   // exact match
                                         // allow all subpaths
 
@@ -94,13 +96,18 @@ public class CorsConfig {
                                         "/api/verify/verified",
 
                                         "/api/verify/download/**",
-                                        "/documents/**"
+                                        "/documents/**",
+                                        "/auth/donations/post",
+                                        "/auth/donations/details",
+                                        "/auth/donations/pending",
+                                        "/auth/donations/update"
 
                                 ).permitAll()
                                 .requestMatchers("/auth/images/**").permitAll()
                                 .requestMatchers("/api/verify/exists/phone/**").permitAll()
                                 .requestMatchers("/api/verify/verification/status/**").permitAll()
                                 .requestMatchers("/auth/profile").authenticated()
+                                .requestMatchers("/uploads/**").permitAll()
 
                                 .requestMatchers("/ADMIN/**").hasRole("ADMIN")
 //                        .requestMatchers("/ORGANIZATION/**").hasRole("ORGANIZATION")

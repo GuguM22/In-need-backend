@@ -18,15 +18,15 @@ public class UserProfileService {
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
         // Delete old image if exists
-        if (user.getProfileImagePath() != null) {
+        if (user.getProfileImageUrl() != null) {
             try {
-                Files.deleteIfExists(Paths.get("uploads").resolve(user.getProfileImagePath()));
+                Files.deleteIfExists(Paths.get("uploads").resolve(user.getProfileImageUrl()));
             } catch (IOException e) {
                 System.err.println("Failed to delete old profile image: " + e.getMessage());
             }
         }
 
-        user.setProfileImagePath(filename); // store only filename
+        user.setProfileImageUrl(filename); // store only filename
         userRepository.save(user);
     }
 }

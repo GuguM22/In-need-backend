@@ -1,6 +1,7 @@
 package com.In_need.inNeedApp.model;
 
 import com.In_need.inNeedApp.constant.DonationFrequency;
+import com.In_need.inNeedApp.constant.DonationStatus;
 import com.In_need.inNeedApp.constant.DonationType;
 import com.In_need.inNeedApp.constant.LogisticPreference;
 import com.fasterxml.jackson.annotation.JsonFormat;
@@ -48,10 +49,27 @@ public class Donation {
     @Column(name = "donation_frequency", nullable = false)
     private DonationFrequency frequency;
 
+    @Column(name = "profile_image")
+    private String profileImageUrl;
+
     @Column(name = "donor_email", nullable = false)
     private String donorEmail;
+
+    @Column(name = "donor_name",  nullable = false)
+    private String donorName;
 
     @Column(name = "createdAt")
     @JsonFormat(pattern = "HH:mm")
     private LocalDateTime createdAt;
+ 
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private DonationStatus status = DonationStatus.PENDING;
+ 
+    private Boolean isAccepted;
+
+    @ManyToOne
+    @JoinColumn(name = "sponsor_request_id")
+    private sponsor_request sponsorRequest;
+ 
 }
