@@ -32,6 +32,9 @@ public class sponsor_request {
     @CreationTimestamp
     private LocalDateTime createdAt;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = true)
+    private Users user;
     // Getter & Setter
     public LocalDateTime getCreatedAt() {
         return createdAt;
@@ -42,13 +45,14 @@ public class sponsor_request {
     // Constructors
     public sponsor_request() {}
 
-    public sponsor_request(String title, String priority, int quantity, LocalDate requiredDate, String description, List<String> mediaUrls) {
+    public sponsor_request(String title, String priority, int quantity, LocalDate requiredDate, String description, List<String> mediaUrls, Users user) {
         this.title = title;
         this.priority = priority;
         this.quantity = quantity;
         this.requiredDate = requiredDate;
         this.description = description;
         this.mediaUrls = mediaUrls;
+        this.user = user;
     }
 
     // Getters & Setters
@@ -72,5 +76,13 @@ public class sponsor_request {
 
     public List<String> getMediaUrls() { return mediaUrls; }
     public void setMediaUrls(List<String> mediaUrls) { this.mediaUrls = mediaUrls; }
+
+    public Users getUser() {
+        return user;
+    }
+
+    public void setUser(Users user) {
+        this.user = user;
+    }
 }
 
