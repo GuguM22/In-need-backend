@@ -1,6 +1,9 @@
 package com.In_need.inNeedApp.model;
 import jakarta.persistence.*;
+import org.hibernate.annotations.CreationTimestamp;
+
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Entity
@@ -26,6 +29,16 @@ public class sponsor_request {
     @Column(name = "media_url")
     private List<String> mediaUrls;
 
+    @CreationTimestamp
+    private LocalDateTime createdAt;
+
+    // Getter & Setter
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
+    }
     // Constructors
     public sponsor_request() {}
 
