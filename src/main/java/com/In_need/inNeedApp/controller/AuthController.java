@@ -268,8 +268,8 @@ public class AuthController {
         profile.put("location", user.getLocation());
 
         // Include profileImagePath
-        if (user.getProfileImagePath() != null) {
-            profile.put("profileImagePath", user.getProfileImagePath());
+        if (user.getProfileImageUrl() != null) {
+            profile.put("profileImagePath", user.getProfileImageUrl());
         }
 
         // 4. Add phone number if verified
