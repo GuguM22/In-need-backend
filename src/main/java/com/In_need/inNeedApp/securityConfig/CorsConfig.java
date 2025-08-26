@@ -54,78 +54,72 @@ public class CorsConfig {
 //        }
 
 
-
     @Configuration
     public class WebConfig implements WebMvcConfigurer {
 
         @Override
         public void addResourceHandlers(ResourceHandlerRegistry registry) {
+            // Serve uploaded files publicly
             registry.addResourceHandler("/uploads/**")
                     .addResourceLocations("file:uploads/");
-
+            registry.addResourceHandler("/auth/images/**")
+                    .addResourceLocations("file:uploads/"); // or wherever images are stored
         }
     }
 
-    @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http, JwtAuthenticationFilter jwtAuthenticationFilter) throws Exception {
-        http
-                .cors(Customizer.withDefaults())
-                .csrf(AbstractHttpConfigurer::disable)
-                .authorizeHttpRequests(auth -> auth
-                                // Public endpoints
-                                .requestMatchers(
-                                        "/auth/register",
-                                        "/auth/login",
-                                        "/auth/forgot-password",
-                                        "/auth/reset-password",
-                                        "/auth/logout",
-                                        "/auth/upload-profile-image",
-                                        "/auth/profile",
-                                        "/api/verify/verification",
-                                        "/api/verify/upload",
+    @Configuration
+    @EnableWebSecurity
+    public class SecurityConfig {
 
+        @Bean
+        public SecurityFilterChain securityFilterChain(HttpSecurity http, JwtAuthenticationFilter jwtAuthenticationFilter) throws Exception {
+            http
+                    .cors(Customizer.withDefaults())
+                    .csrf(AbstractHttpConfigurer::disable)
+                    .authorizeHttpRequests(auth -> auth
+                            // Public endpoints
+                            .requestMatchers(
+                                    "/auth/register",
+                                    "/auth/login",
+                                    "/auth/forgot-password",
+                                    "/auth/reset-password",
+                                    "/auth/logout",
+                                    "/auth/upload-profile-image",
+                                    "/auth/profile",
+                                    "/api/verify/verification",
+                                    "/api/verify/upload",
+                                    "/api/individual-requests",
+                                    "/api/verify/verified",
+                                    "/api/verify/download/**",
+                                    "/documents/**",
+                                    "/auth/donations/post",
+                                    "/auth/donations/details",
+                                    "/auth/donations/pending",
+                                    "/auth/donations/update",
+                                    "/auth/donations/{id}",
+                                    "/auth/images/**",
+                                    "/uploads/**",
+                                    "/api/verify/exists/phone/**",
+                                    "/api/verify/verification/status/**"
+                            ).permitAll()
+                            // Authenticated endpoints
+                            .requestMatchers("/auth/profile").authenticated()
+                            // Role-based endpoints
+                            .requestMatchers("/ADMIN/**").hasRole("ADMIN")
+                            .requestMatchers("/INDIVIDUAL/**").hasRole("INDIVIDUAL")
+                            .requestMatchers("/SPONSORS/**").hasAnyRole("SPONSORS", "ADMIN")
+                            .requestMatchers("/auth/donations/**").hasAnyRole("SPONSORS", "INDIVIDUAL")
+                            // Everything else requires authentication
+                            .anyRequest().authenticated()
+                    )
+                    // Skip JWT filter for public URLs
+                    .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
+                    .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
 
-                                        "/api/individual-requests",   // exact match
-                                        // allow all subpaths
-
-
-                                        // Role-based endpoints
-
-
-                                        //"/api/verify/exists/phone/**",
-                                        "/api/verify/verified",
-
-                                        "/api/verify/download/**",
-                                        "/documents/**",
-                                        "/auth/donations/post",
-                                        "/auth/donations/details",
-                                        "/auth/donations/pending",
-                                        "/auth/donations/update"
-
-                                ).permitAll()
-                                .requestMatchers("/auth/images/**").permitAll()
-                                .requestMatchers("/api/verify/exists/phone/**").permitAll()
-                                .requestMatchers("/api/verify/verification/status/**").permitAll()
-                                .requestMatchers("/auth/profile").authenticated()
-                                .requestMatchers("/uploads/**").permitAll()
-
-                                .requestMatchers("/ADMIN/**").hasRole("ADMIN")
-//                        .requestMatchers("/ORGANIZATION/**").hasRole("ORGANIZATION")
-                                .requestMatchers("/INDIVIDUAL/**").hasRole("INDIVIDUAL")
-                                .requestMatchers("/SPONSORS/**").hasAnyRole("SPONSORS", "ADMIN")
-                                .requestMatchers("/auth/donations/**").hasAnyRole("SPONSORS")
-
-                                // Everything else requires authentication
-                                .anyRequest().authenticated()
-                )
-                // Make sure JWT filter is only applied after public endpoints are bypassed
-                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
-                .sessionManagement(session -> session
-                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-                );
-
-        return http.build();
+            return http.build();
+        }
     }
+
     @Bean
         public AuthenticationManager authenticationManager(HttpSecurity http) throws Exception {
             AuthenticationManagerBuilder authBuilder = http.getSharedObject(AuthenticationManagerBuilder.class);

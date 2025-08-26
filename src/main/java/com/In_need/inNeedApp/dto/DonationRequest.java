@@ -3,6 +3,7 @@ package com.In_need.inNeedApp.dto;
 import com.In_need.inNeedApp.constant.DonationFrequency;
 import com.In_need.inNeedApp.constant.DonationType;
 import com.In_need.inNeedApp.constant.LogisticPreference;
+import com.In_need.inNeedApp.constant.Role;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
@@ -14,6 +15,9 @@ import java.time.LocalDateTime;
 
 @Data
 public class DonationRequest {
+    @NotNull(message = "Donation ID must not be null")
+    private Long id;
+
     @NotBlank(message = "Description is required")
     private String description;
 
@@ -44,6 +48,8 @@ public class DonationRequest {
     private String profileImageUrl;
 
     private String donorName;
+
+    private Role donorRole;
 
     public String getTimeAgo() {
         Duration duration = Duration.between(createdAt, LocalDateTime.now());

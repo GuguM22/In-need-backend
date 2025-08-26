@@ -40,6 +40,7 @@ import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.security.Principal;
 import java.util.*;
+import java.util.stream.Collectors;
 
 
 @CrossOrigin(origins = "http://localhost:4200")
@@ -108,7 +109,7 @@ public class AuthController {
         Users user = new Users();
         user.setEmail(request.getEmail().toLowerCase());
         user.setPassword(passwordEncoder.encode(request.getPassword()));
-        user.setUsername(request.getUsername());
+        user.setUsername(capitalizeWords(request.getUsername()));
         user.setRole(request.getRole());
 //        user.setVerified(false);
 //        user.setVerificationToken(UUID.randomUUID().toString());
@@ -262,10 +263,17 @@ public class AuthController {
 
         // 3. Build profile response
         Map<String, Object> profile = new HashMap<>();
-        profile.put("name", user.getUsername());   // or user.getName() depending on your entity
+        profile.put("name", capitalizeWords(user.getUsername()));   // or user.getName() depending on your entity
         profile.put("email", user.getEmail());
         profile.put("bio", user.getBio());
-        profile.put("location", user.getLocation());
+        String city = (user.getLocation() != null && user.getLocation().getCity() != null)
+                ? user.getLocation().getCity() : "";
+        String province = (user.getLocation() != null && user.getLocation().getProvince() != null)
+                ? user.getLocation().getProvince() : "";
+
+        String location = (city.isEmpty() ? "" : city) + (province.isEmpty() ? "" : (city.isEmpty() ? "" : ", ") + province);
+
+        profile.put("location", capitalizeWords(location));
 
         // Include profileImagePath
         if (user.getProfileImageUrl() != null) {
@@ -381,6 +389,16 @@ public class AuthController {
                 .body((Resource) resource);
     }
 
+    public static String capitalizeWords(String input) {
+        if (input == null || input.isBlank()) {
+            return input; // return as is if null or empty
+        }
+
+        return Arrays.stream(input.trim().split("\\s+"))
+                .filter(word -> !word.isEmpty()) // ignore extra spaces
+                .map(word -> Character.toTitleCase(word.charAt(0)) + word.substring(1).toLowerCase())
+                .collect(Collectors.joining(" "));
+    }
 
 
 }
