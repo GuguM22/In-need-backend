@@ -3,6 +3,7 @@ package com.In_need.inNeedApp.dto;
 import lombok.Data;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Data
@@ -15,4 +16,5 @@ public class IndividualRequestDTO {
     private String description;
     private List<String> mediaUrls;
     private String username;
+    private LocalDateTime createdAt;
 }

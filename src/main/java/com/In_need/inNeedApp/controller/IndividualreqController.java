@@ -143,6 +143,7 @@ public List<IndividualRequestDTO> getAll() {
         dto.setDescription(req.getDescription());
         dto.setMediaUrls(req.getMediaUrls());
         dto.setUsername(req.getUser() != null ? req.getUser().getUsername() : "Anonymous");
+        dto.setCreatedAt(req.getCreatedAt());
         return dto;
     }).toList();
 }
