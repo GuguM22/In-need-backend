@@ -275,11 +275,12 @@ public class AuthController {
 
         profile.put("location", capitalizeWords(location));
 
+
         // Include profileImagePath
         if (user.getProfileImageUrl() != null) {
             profile.put("profileImagePath", user.getProfileImageUrl());
         }
-
+        profile.put("role", user.getRole());
         // 4. Add phone number if verified
         verificationRepository.findByUserId(user.getId())
                 .ifPresent(verification -> profile.put("phone", verification.getPhoneNumber()));
