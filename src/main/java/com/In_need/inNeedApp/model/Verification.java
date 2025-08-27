@@ -42,6 +42,10 @@ public class Verification {
     @JoinColumn(name = "user_id", nullable = false)
     private Users user;
 
+   /* @Column(name = "status")
+    @Enumerated(EnumType.STRING)
+    private VerificationStatus verificationStatus; */
+
     @Column(name = "submitted_date")
     private LocalDateTime submittedDate;
 
