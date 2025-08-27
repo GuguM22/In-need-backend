@@ -12,6 +12,7 @@ public class sponsorRequest {private String title;
     private LocalDate requiredDate;
     private String description;
     private List<MultipartFile> media;
+    private String location;
 
     private List<String> mediaUrls;
     public List<String> getMediaUrls() { return mediaUrls; }
@@ -35,6 +36,14 @@ public class sponsorRequest {private String title;
 
     public List<MultipartFile> getMedia() { return media; }
     public void setMedia(List<MultipartFile> media) { this.media = media; }
+
+    public String getLocation() {
+        return location;
+    }
+
+    public void setLocation(String location) {
+        this.location = location;
+    }
 }
 
 

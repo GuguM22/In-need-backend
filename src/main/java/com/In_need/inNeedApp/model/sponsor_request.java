@@ -32,9 +32,12 @@ public class sponsor_request {
     @CreationTimestamp
     private LocalDateTime createdAt;
 
+    private String location;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = true)
     private Users user;
+
     // Getter & Setter
     public LocalDateTime getCreatedAt() {
         return createdAt;
@@ -52,6 +55,7 @@ public class sponsor_request {
         this.requiredDate = requiredDate;
         this.description = description;
         this.mediaUrls = mediaUrls;
+        this.location = location;
         this.user = user;
     }
 
@@ -84,5 +88,14 @@ public class sponsor_request {
     public void setUser(Users user) {
         this.user = user;
     }
+
+    public String getLocation() {
+        return location;
+    }
+
+    public void setLocation(String location) {
+        this.location = location;
+    }
+
 }
 

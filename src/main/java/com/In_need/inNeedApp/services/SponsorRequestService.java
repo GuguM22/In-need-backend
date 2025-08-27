@@ -44,6 +44,7 @@ public class SponsorRequestService {
         existing.setQuantity(dto.getQuantity());
         existing.setRequiredDate(dto.getRequiredDate());
         existing.setDescription(dto.getDescription());
+        existing.setLocation(dto.getLocation());
         existing.setMediaUrls(dto.getMediaUrls()); // make sure DTO has mediaUrls
 
         return sponsor_requestRepository.save(existing);
