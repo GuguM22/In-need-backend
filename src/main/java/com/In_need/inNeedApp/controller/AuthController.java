@@ -252,41 +252,41 @@ public class AuthController {
     @Transactional(readOnly = true)
     @GetMapping("/profile")
     public ResponseEntity<?> getProfile(Principal principal) {
-        // 1. Authentication check
         if (principal == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("User not authenticated");
         }
 
-        // 2. Fetch user from database
         Users user = userRepository.findByEmailIgnoreCase(principal.getName())
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
-        // 3. Build profile response
         Map<String, Object> profile = new HashMap<>();
-        profile.put("name", capitalizeWords(user.getUsername()));   // or user.getName() depending on your entity
+        profile.put("name", capitalizeWords(user.getUsername()));
         profile.put("email", user.getEmail());
         profile.put("bio", user.getBio());
-        String city = (user.getLocation() != null && user.getLocation().getCity() != null)
-                ? user.getLocation().getCity() : "";
-        String province = (user.getLocation() != null && user.getLocation().getProvince() != null)
-                ? user.getLocation().getProvince() : "";
+        profile.put("role", user.getRole());
 
-        String location = (city.isEmpty() ? "" : city) + (province.isEmpty() ? "" : (city.isEmpty() ? "" : ", ") + province);
-
+        String location = "";
+        if (user.getLocation() != null) {
+            String city = user.getLocation().getCity() != null ? user.getLocation().getCity() : "";
+            String province = user.getLocation().getProvince() != null ? user.getLocation().getProvince() : "";
+            location = (city.isEmpty() ? "" : city) + (province.isEmpty() ? "" : (city.isEmpty() ? "" : ", ") + province);
+        }
         profile.put("location", capitalizeWords(location));
 
+        // Add phone and status if verified
+        verificationRepository.findByUserId(user.getId())
+                .ifPresent(verification -> {
+                    profile.put("phone", verification.getPhoneNumber());
+                    profile.put("phoneStatus", verification.getStatus().name()); // <-- add status
+                });
 
-        // Include profileImagePath
         if (user.getProfileImageUrl() != null) {
             profile.put("profileImagePath", user.getProfileImageUrl());
         }
-        profile.put("role", user.getRole());
-        // 4. Add phone number if verified
-        verificationRepository.findByUserId(user.getId())
-                .ifPresent(verification -> profile.put("phone", verification.getPhoneNumber()));
 
         return ResponseEntity.ok(profile);
     }
+
 
 
     @PatchMapping("/profile")
