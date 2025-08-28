@@ -15,6 +15,8 @@ public class sponsorRequest {private String title;
     private String location;
 
     private List<String> mediaUrls;
+
+    private String profileImageUrl;
     public List<String> getMediaUrls() { return mediaUrls; }
     public void setMediaUrls(List<String> mediaUrls) { this.mediaUrls = mediaUrls; }
 
@@ -43,6 +45,14 @@ public class sponsorRequest {private String title;
 
     public void setLocation(String location) {
         this.location = location;
+    }
+
+    public void setProfileImageUrl(String profileImageUrl) {
+        this.profileImageUrl = profileImageUrl;
+    }
+
+    public String getProfileImageUrl() {
+        return profileImageUrl;
     }
 }
 

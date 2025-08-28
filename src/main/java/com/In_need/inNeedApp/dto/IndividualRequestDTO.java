@@ -17,4 +17,5 @@ public class IndividualRequestDTO {
     private List<String> mediaUrls;
     private String username;
     private LocalDateTime createdAt;
+    private String profileImageUrl;
 }
