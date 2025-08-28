@@ -110,6 +110,10 @@ public class DonationService {
         return donationRepository.findById(id);
     }
 
+    public List<Donation> getAllDonations() {
+        return donationRepository.findAll(); // ✅ or add custom sort by createdAt DESC
+    }
+
 
 
 }
