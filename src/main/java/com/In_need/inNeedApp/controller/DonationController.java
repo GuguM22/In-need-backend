@@ -76,11 +76,11 @@ public class DonationController {
 
     @GetMapping("/details")
     public ResponseEntity<List<DonationRequest>> getAllDonations() {
-        List<Donation> donations = donationService.getPendingDonations(); // only pending
+        List<Donation> donations = donationService.getAllDonations(); // only pending
         List<DonationRequest> dtoList = donations.stream().map(d -> {
             DonationRequest dto = new DonationRequest();
             BeanUtils.copyProperties(d, dto);
-
+            dto.setStatus(d.getStatus());
             userRepository.findByEmailIgnoreCase(d.getDonorEmail())
                     .ifPresent(user -> {
                         dto.setDonorName(capitalizeWords(user.getUsername()));
@@ -124,7 +124,7 @@ public class DonationController {
 
            // Explicitly set ID
            dto.setId(d.getId());
-
+           dto.setStatus(d.getStatus());
            // Map user details
            userRepository.findByEmailIgnoreCase(d.getDonorEmail())
                    .ifPresent(user -> {

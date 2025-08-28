@@ -1,9 +1,6 @@
 package com.In_need.inNeedApp.dto;
 
-import com.In_need.inNeedApp.constant.DonationFrequency;
-import com.In_need.inNeedApp.constant.DonationType;
-import com.In_need.inNeedApp.constant.LogisticPreference;
-import com.In_need.inNeedApp.constant.Role;
+import com.In_need.inNeedApp.constant.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
@@ -50,6 +47,8 @@ public class DonationRequest {
     private String donorName;
 
     private Role donorRole;
+
+    private DonationStatus status;
 
     public String getTimeAgo() {
         Duration duration = Duration.between(createdAt, LocalDateTime.now());
