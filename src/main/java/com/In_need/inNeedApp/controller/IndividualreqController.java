@@ -144,6 +144,13 @@ public List<IndividualRequestDTO> getAll() {
         dto.setMediaUrls(req.getMediaUrls());
         dto.setUsername(req.getUser() != null ? req.getUser().getUsername() : "Anonymous");
         dto.setCreatedAt(req.getCreatedAt());
+
+        // Add profile image from user
+        if (req.getUser() != null) {
+            dto.setProfileImageUrl(req.getUser().getProfileImageUrl());
+        } else {
+            dto.setProfileImageUrl(null); // fallback handled by frontend
+        }
         return dto;
     }).toList();
 }
