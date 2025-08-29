@@ -5,6 +5,7 @@ import com.In_need.inNeedApp.dto.DonationRequest;
 import com.In_need.inNeedApp.dto.DonationUpdate;
 import com.In_need.inNeedApp.model.Donation;
 import com.In_need.inNeedApp.model.Users;
+import com.In_need.inNeedApp.model.sponsor_request;
 import com.In_need.inNeedApp.repository.DonationRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -23,7 +24,7 @@ public class DonationService {
         this.donationRepository = donationRepository;
     }
 
-    public Donation createDonation(DonationRequest request, Users user) {
+    public Donation createDonation(DonationRequest request, Users user, sponsor_request sponsorRequest) {
         Donation donation = new Donation();
         donation.setType(request.getType());
         donation.setDescription(request.getDescription());
@@ -39,8 +40,11 @@ public class DonationService {
         donation.setProfileImageUrl(user.getProfileImageUrl());
         donation.setCreatedAt(LocalDateTime.now());
 
+        donation.setSponsorRequest(sponsorRequest);
+
         return donationRepository.save(donation);
     }
+
 
  
    /* public List<Donation> getDonationsByEmail(String donorEmail) {
@@ -97,9 +101,15 @@ public class DonationService {
             dto.setDonorRole(d.getDonorRole());
             dto.setProfileImageUrl(d.getProfileImageUrl());
             dto.setCreatedAt(d.getCreatedAt());
+
+            dto.setSponsorRequestId(
+                    d.getSponsorRequest() != null ? d.getSponsorRequest().getId() : null
+            );
+
             return dto;
         }).collect(Collectors.toList());
     }
+
 
     // in DonationService
     public List<Donation> getPendingDonations() {
@@ -111,9 +121,8 @@ public class DonationService {
     }
 
     public List<Donation> getAllDonations() {
-        return donationRepository.findAll(); // ✅ or add custom sort by createdAt DESC
+        return donationRepository.findAll();
     }
-
 
 
 }

@@ -100,7 +100,8 @@ public class CorsConfig {
                                     "/auth/images/**",
                                     "/uploads/**",
                                     "/api/verify/exists/phone/**",
-                                    "/api/verify/verification/status/**"
+                                    "/api/verify/verification/status/**",
+                                    "/api/sponsor-requests/my-post"
                             ).permitAll()
                             // Authenticated endpoints
                             .requestMatchers("/auth/profile").authenticated()

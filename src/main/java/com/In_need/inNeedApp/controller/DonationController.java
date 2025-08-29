@@ -8,11 +8,14 @@ import com.In_need.inNeedApp.dto.DonationUpdate;
  
 import com.In_need.inNeedApp.model.Donation;
 import com.In_need.inNeedApp.model.Users;
+import com.In_need.inNeedApp.model.sponsor_request;
 import com.In_need.inNeedApp.repository.DonationRepository;
 import com.In_need.inNeedApp.repository.UserRepository;
+import com.In_need.inNeedApp.repository.sponsor_requestRepository;
 import com.In_need.inNeedApp.services.DonationService;
 import jakarta.validation.Valid;
 import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
@@ -31,13 +34,17 @@ public class DonationController {
     private final DonationService donationService;
     private final UserRepository userRepository;
     private final DonationRepository donationRepository;
+    private final sponsor_requestRepository sponsorRequestRepository;
 
+    @Autowired
     public DonationController(DonationService donationService,
                               UserRepository userRepository,
-                              DonationRepository donationRepository) {
+                              DonationRepository donationRepository,
+                              sponsor_requestRepository sponsorRequestRepository) {
         this.donationService = donationService;
         this.userRepository = userRepository;
         this.donationRepository = donationRepository;
+        this.sponsorRequestRepository = sponsorRequestRepository;
     }
 
     @PostMapping("/post")
@@ -50,9 +57,18 @@ public class DonationController {
         }
 
         Users user = userOpt.get();
-        Donation savedDonation = donationService.createDonation(request, user);
+
+        // Optional: link to sponsor request if provided
+        sponsor_request sponsorRequest = null;
+        if (request.getSponsorRequestId() != null) {
+            sponsorRequest = sponsorRequestRepository.findById(request.getSponsorRequestId())
+                    .orElseThrow(() -> new RuntimeException("Sponsor request not found"));
+        }
+
+        Donation savedDonation = donationService.createDonation(request, user, sponsorRequest);
         return ResponseEntity.status(HttpStatus.CREATED).body(savedDonation);
     }
+
 
  
    /* @GetMapping("/{email}")
@@ -141,14 +157,53 @@ public class DonationController {
 
 
     @GetMapping("/accepted")
-    public List<Donation> getAcceptedDonations() {
-        return donationService.getDonationsByStatus(DonationStatus.ACCEPTED);
+    public ResponseEntity<List<DonationRequest>> getAcceptedDonations() {
+        List<Donation> donations = donationService.getDonationsByStatus(DonationStatus.ACCEPTED);
+
+        List<DonationRequest> dtoList = donations.stream().map(d -> {
+            DonationRequest dto = new DonationRequest();
+            BeanUtils.copyProperties(d, dto);
+
+            dto.setId(d.getId());
+            dto.setStatus(d.getStatus());
+
+            userRepository.findByEmailIgnoreCase(d.getDonorEmail())
+                    .ifPresent(user -> {
+                        dto.setDonorName(capitalizeWords(user.getUsername()));
+                        dto.setDonorRole(user.getRole());
+                        dto.setProfileImageUrl(user.getProfileImageUrl());
+                    });
+
+            return dto;
+        }).collect(Collectors.toList());
+
+        return ResponseEntity.ok(dtoList);
     }
 
     @GetMapping("/declined")
-    public List<Donation> getDeclinedDonations() {
-        return donationService.getDonationsByStatus(DonationStatus.DECLINED);
+    public ResponseEntity<List<DonationRequest>> getDeclinedDonations() {
+        List<Donation> donations = donationService.getDonationsByStatus(DonationStatus.DECLINED);
+
+        List<DonationRequest> dtoList = donations.stream().map(d -> {
+            DonationRequest dto = new DonationRequest();
+            BeanUtils.copyProperties(d, dto);
+
+            dto.setId(d.getId());
+            dto.setStatus(d.getStatus());
+
+            userRepository.findByEmailIgnoreCase(d.getDonorEmail())
+                    .ifPresent(user -> {
+                        dto.setDonorName(capitalizeWords(user.getUsername()));
+                        dto.setDonorRole(user.getRole());
+                        dto.setProfileImageUrl(user.getProfileImageUrl());
+                    });
+
+            return dto;
+        }).collect(Collectors.toList());
+
+        return ResponseEntity.ok(dtoList);
     }
+
 
     @PutMapping("/update")
     public ResponseEntity<?> updateDonation(@RequestBody DonationUpdateRequest request) {

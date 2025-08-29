@@ -43,6 +43,9 @@ public class Users {
     @Embedded
     private Location location;
 
+    /*@OneToMany(mappedBy = "user")
+    private List<sponsor_request> sponsorRequests;*/
+
 //    @Column(name = "verification_token")
 //    private String verificationToken;
 

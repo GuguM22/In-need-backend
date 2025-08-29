@@ -1,6 +1,7 @@
 package com.In_need.inNeedApp.services;
 
 import com.In_need.inNeedApp.dto.sponsorRequest;
+import com.In_need.inNeedApp.model.Users;
 import com.In_need.inNeedApp.model.sponsor_request;
 import com.In_need.inNeedApp.repository.sponsor_requestRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,6 +49,10 @@ public class SponsorRequestService {
         existing.setMediaUrls(dto.getMediaUrls()); // make sure DTO has mediaUrls
 
         return sponsor_requestRepository.save(existing);
+    }
+
+    public List<sponsor_request> getByUser(Users user) {
+        return sponsor_requestRepository.findByUser(user);
     }
 
 
