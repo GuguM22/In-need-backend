@@ -4,6 +4,7 @@ import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -37,6 +38,9 @@ public class sponsor_request {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = true)
     private Users user;
+
+    @OneToMany(mappedBy = "sponsorRequest", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Donation> donations = new ArrayList<>();
 
     // Getter & Setter
     public LocalDateTime getCreatedAt() {
@@ -97,5 +101,12 @@ public class sponsor_request {
         this.location = location;
     }
 
+    public void setDonations(List<Donation> donations) {
+        this.donations = donations;
+    }
+
+    public List<Donation> getDonations() {
+        return donations;
+    }
 }
 

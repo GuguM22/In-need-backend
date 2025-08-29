@@ -67,7 +67,7 @@ public class Donation {
  
     private Boolean isAccepted;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "sponsor_request_id")
     private sponsor_request sponsorRequest;
  

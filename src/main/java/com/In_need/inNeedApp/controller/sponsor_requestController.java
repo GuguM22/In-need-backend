@@ -159,6 +159,38 @@ public class sponsor_requestController {
             return ResponseEntity.badRequest().build();
         }
     }
+    @GetMapping("/my-posts")
+    public ResponseEntity<List<sponsor_request>> getMyRequests() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
+        if (authentication == null || !authentication.isAuthenticated() ||
+                "anonymousUser".equals(authentication.getPrincipal())) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        String email = authentication.getName();
+        Users user = userService.findByEmail(email); // Fetch logged-in user
+
+        if (user == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+
+        List<sponsor_request> requests = sponsorRequestService.getByUser(user);
+
+        return ResponseEntity.ok(requests);
+    }
+
+   /* @PutMapping("/{id}/fulfill")
+    public ResponseEntity<sponsor_request> markFulfilled(@PathVariable Long id) {
+        sponsor_request req = sponsorRequestService.getById(id);
+        if (req == null) {
+            return ResponseEntity.notFound().build();
+        }
+
+        req.setFulfilled(true);
+        sponsor_request updated = sponsorRequestService.saveSponsorRequest(req);
+
+        return ResponseEntity.ok(updated);
+    }*/
 
 }
