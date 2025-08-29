@@ -40,7 +40,8 @@ public class sponsor_request {
     private Users user;
 
     @OneToMany(mappedBy = "sponsorRequest", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Donation> donations = new ArrayList<>();
+    @com.fasterxml.jackson.annotation.JsonManagedReference
+    private List<Donation> donations;
 
     // Getter & Setter
     public LocalDateTime getCreatedAt() {
