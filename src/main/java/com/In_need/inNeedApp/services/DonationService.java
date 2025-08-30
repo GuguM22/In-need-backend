@@ -26,21 +26,24 @@ public class DonationService {
 
     public Donation createDonation(DonationRequest request, Users user, sponsor_request sponsorRequest) {
         Donation donation = new Donation();
-        donation.setType(request.getType());
+
         donation.setDescription(request.getDescription());
         donation.setQuantity(request.getQuantity());
         donation.setAvailability(request.getAvailability());
         donation.setAdditionalNotes(request.getAdditionalNotes());
         donation.setPreference(request.getPreference());
+        donation.setType(request.getType());
         donation.setFrequency(request.getFrequency());
-
-        donation.setDonorEmail(user.getEmail());
+        donation.setDonorEmail(request.getDonorEmail());
         donation.setDonorName(user.getUsername());
         donation.setDonorRole(user.getRole());
-        donation.setProfileImageUrl(user.getProfileImageUrl());
         donation.setCreatedAt(LocalDateTime.now());
+        donation.setStatus(DonationStatus.PENDING);
 
-        donation.setSponsorRequest(sponsorRequest);
+        // 🔥 Critical line to associate the donation with the sponsor request
+        if (sponsorRequest != null) {
+            donation.setSponsorRequest(sponsorRequest);
+        }
 
         return donationRepository.save(donation);
     }

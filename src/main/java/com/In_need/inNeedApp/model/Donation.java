@@ -69,6 +69,7 @@ public class Donation {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "sponsor_request_id")
+    @com.fasterxml.jackson.annotation.JsonBackReference
     private sponsor_request sponsorRequest;
- 
+
 }
