@@ -401,7 +401,12 @@ public class AuthController {
                 .collect(Collectors.joining(" "));
     }
 
-
+    @GetMapping("/test")
+    public ResponseEntity<?> test(Authentication auth) {
+        System.out.println("Current user: " + auth.getName());
+        System.out.println("Authorities: " + auth.getAuthorities());
+        return ResponseEntity.ok("Authenticated");
+    }
 }
 
 

@@ -64,6 +64,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                     UsernamePasswordAuthenticationToken authentication =
                             new UsernamePasswordAuthenticationToken(email, null, getAuthorities(token));
                     SecurityContextHolder.getContext().setAuthentication(authentication);
+                    System.out.println("✅ Set authentication with authorities: " + authentication.getAuthorities());
+
                 }
             } catch (Exception e) {
                 response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Invalid or expired token");
@@ -91,6 +93,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 .getBody();
 
         Object rolesObject = claims.get("roles");
+        System.out.println("Extracted roles from JWT: " + rolesObject);
 
         if (rolesObject instanceof Collection<?>) {
             Collection<?> roles = (Collection<?>) rolesObject;
