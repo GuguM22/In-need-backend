@@ -5,7 +5,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.time.LocalDate;
-@Service
+
 public class sponsorRequest {private String title;
     private String priority;
     private int quantity;
