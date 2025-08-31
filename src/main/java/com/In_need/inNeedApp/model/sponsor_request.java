@@ -43,6 +43,9 @@ public class sponsor_request {
     @com.fasterxml.jackson.annotation.JsonManagedReference
     private List<Donation> donations;
 
+    @Column(name = "fulfilled")
+    private boolean fulfilled = false;
+
     // Getter & Setter
     public LocalDateTime getCreatedAt() {
         return createdAt;
@@ -108,6 +111,14 @@ public class sponsor_request {
 
     public List<Donation> getDonations() {
         return donations;
+    }
+
+    public boolean isFulfilled() {
+        return fulfilled;
+    }
+
+    public void setFulfilled(boolean fulfilled) {
+        this.fulfilled = fulfilled;
     }
 }
 

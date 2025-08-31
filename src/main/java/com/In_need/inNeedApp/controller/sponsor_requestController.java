@@ -193,4 +193,17 @@ public class sponsor_requestController {
         return ResponseEntity.ok(updated);
     }*/
 
+    @PutMapping("/{id}/fulfill")
+    public ResponseEntity<sponsor_request> markFulfilled(@PathVariable Long id) {
+        sponsor_request req = sponsorRequestService.getById(id);
+        if (req == null) {
+            return ResponseEntity.notFound().build();
+        }
+
+        req.setFulfilled(true);
+        sponsor_request updated = sponsorRequestService.saveSponsorRequest(req);
+
+        return ResponseEntity.ok(updated);
+    }
+
 }
