@@ -13,5 +13,6 @@ public interface DonationRepository extends JpaRepository<Donation, Long> {
     List<Donation> findByDonorEmailIgnoreCase(String donorEmail);
     List<Donation> findByStatus(DonationStatus status);
     List<Donation> findBySponsorRequest(sponsor_request request);
-
+    List<Donation> findBySponsorRequest_Id(Long sponsorRequestId);
+    List<Donation> findBySponsorRequestId(Long sponsorRequestId);
 }

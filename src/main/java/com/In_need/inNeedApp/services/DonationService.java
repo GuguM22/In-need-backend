@@ -49,9 +49,9 @@ public class DonationService {
     }
 
 
- 
+
    /* public List<Donation> getDonationsByEmail(String donorEmail) {
- 
+
     public Donation updateDonation(DonationUpdate donationUpdate) {
         Donation donation = donationRepository.findById(donationUpdate.getId())
                 .orElseThrow(() -> new RuntimeException("Donation not found"));
@@ -63,7 +63,7 @@ public class DonationService {
 
 
     public List<Donation> getDonationsByEmail(String donorEmail) {
- 
+
         return donationRepository.findByDonorEmailIgnoreCase(donorEmail);
     }*/
 
@@ -126,6 +126,19 @@ public class DonationService {
     public List<Donation> getAllDonations() {
         return donationRepository.findAll();
     }
+
+    public Donation confirmDonationReceived(Long donationId) {
+        Donation donation = donationRepository.findById(donationId)
+                .orElseThrow(() -> new RuntimeException("Donation not found"));
+
+        if (donation.getStatus() == DonationStatus.ACCEPTED) {  // use status instead of isAccepted
+            donation.setIsReceived(true);
+            return donationRepository.save(donation);
+        } else {
+            throw new RuntimeException("Donation must be accepted before confirming receipt");
+        }
+    }
+
 
 
 }

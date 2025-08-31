@@ -52,6 +52,8 @@ public class DonationRequest {
 
     private Long sponsorRequestId;
 
+    private Boolean isReceived;
+
     public String getTimeAgo() {
         Duration duration = Duration.between(createdAt, LocalDateTime.now());
 

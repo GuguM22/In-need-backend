@@ -72,4 +72,7 @@ public class Donation {
     @com.fasterxml.jackson.annotation.JsonBackReference
     private sponsor_request sponsorRequest;
 
+    @Column(name = "is_received")
+    private Boolean isReceived = false;
+
 }

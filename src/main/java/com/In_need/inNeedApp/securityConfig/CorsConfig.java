@@ -109,7 +109,7 @@ public class CorsConfig {
                             .requestMatchers("/ADMIN/**").hasRole("ADMIN")
                             .requestMatchers("/INDIVIDUAL/**").hasRole("INDIVIDUAL")
                             .requestMatchers("/SPONSORS/**").hasAnyRole("SPONSORS", "ADMIN")
-                            .requestMatchers("/auth/donations/**").hasAnyRole("SPONSORS", "INDIVIDUAL")
+                            .requestMatchers("/auth/donations/**").hasAnyAuthority("ROLE_SPONSORS", "ROLE_INDIVIDUAL", "ROLE_ORGANIZATION")
                             // Everything else requires authentication
                             .anyRequest().authenticated()
                     )

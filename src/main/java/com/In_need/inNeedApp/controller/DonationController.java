@@ -97,11 +97,13 @@ public class DonationController {
             DonationRequest dto = new DonationRequest();
             BeanUtils.copyProperties(d, dto);
             dto.setStatus(d.getStatus());
+            dto.setIsReceived(d.getIsReceived()); // <- Add this line
             userRepository.findByEmailIgnoreCase(d.getDonorEmail())
                     .ifPresent(user -> {
                         dto.setDonorName(capitalizeWords(user.getUsername()));
                         dto.setDonorRole(user.getRole());
                         dto.setProfileImageUrl(user.getProfileImageUrl());
+
                     });
 
             return dto;
@@ -234,5 +236,40 @@ public class DonationController {
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
+
+    @PutMapping("/{id}/confirm-receipt")
+    public ResponseEntity<?> confirmDonationReceipt(@PathVariable Long id) {
+        try {
+            Donation updatedDonation = donationService.confirmDonationReceived(id);
+            return ResponseEntity.ok(updatedDonation);
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    @GetMapping("/sponsor-request/{id}/donations")
+    public ResponseEntity<List<DonationRequest>> getDonationsBySponsorRequestId(@PathVariable Long id) {
+        List<Donation> donations = donationRepository.findBySponsorRequestId(id);
+
+        List<DonationRequest> dtoList = donations.stream().map(d -> {
+            DonationRequest dto = new DonationRequest();
+            BeanUtils.copyProperties(d, dto);
+            dto.setId(d.getId());
+            dto.setStatus(d.getStatus());
+            dto.setIsReceived(d.getIsReceived());
+
+            userRepository.findByEmailIgnoreCase(d.getDonorEmail())
+                    .ifPresent(user -> {
+                        dto.setDonorName(capitalizeWords(user.getUsername()));
+                        dto.setDonorRole(user.getRole());
+                        dto.setProfileImageUrl(user.getProfileImageUrl());
+                    });
+
+            return dto;
+        }).toList();
+
+        return ResponseEntity.ok(dtoList);
+    }
+
 
 }
