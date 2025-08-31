@@ -15,4 +15,4 @@ public class SponsorRequestResponseDTO {
     private List<String> mediaUrls;
     private String username;
     private String location;
-}
+ }

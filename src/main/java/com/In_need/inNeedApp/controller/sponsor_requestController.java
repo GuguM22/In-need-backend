@@ -1,5 +1,6 @@
 package com.In_need.inNeedApp.controller;
 
+import com.In_need.inNeedApp.dto.SponsorRequestResponseDTO;
 import com.In_need.inNeedApp.dto.sponsorRequest;
 import com.In_need.inNeedApp.model.Users;
 import com.In_need.inNeedApp.model.sponsor_request;
@@ -103,29 +104,64 @@ public class sponsor_requestController {
 //        }
 //    }
 
-    @PostMapping(consumes = {"multipart/form-data", "application/json"})
-    public ResponseEntity<sponsor_request> createRequest(
-            @RequestBody sponsor_request request,
-            List<MultipartFile> mediaFiles
-    ) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+    @PostMapping(consumes = {"multipart/form-data"})
+    public ResponseEntity<SponsorRequestResponseDTO> createRequest(@ModelAttribute sponsorRequest requestDto) {
+        try {
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
-        // DEBUG: Check what's going on
-        System.out.println("Authentication = " + authentication);
+            if (authentication == null || !authentication.isAuthenticated() ||
+                    "anonymousUser".equals(authentication.getPrincipal())) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+            }
 
-        if (authentication == null || !authentication.isAuthenticated() ||
-                "anonymousUser".equals(authentication.getPrincipal())) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build(); // 401
+            String email = authentication.getName();
+            Users user = userService.findByEmail(email);
+
+            // Process and store media files
+            List<String> mediaUrls = new ArrayList<>();
+            List<MultipartFile> mediaFiles = requestDto.getMedia();
+
+            if (mediaFiles != null && !mediaFiles.isEmpty()) {
+                for (MultipartFile file : mediaFiles) {
+                    String filename = System.currentTimeMillis() + "_" + file.getOriginalFilename();
+                    Path filePath = uploadDir.resolve(filename);
+                    Files.copy(file.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
+                    mediaUrls.add(filename); // Save only filename (you can prefix URL later)
+                }
+            }
+
+            // Save sponsor request entity
+            sponsor_request newRequest = new sponsor_request();
+            newRequest.setTitle(requestDto.getTitle());
+            newRequest.setPriority(requestDto.getPriority());
+            newRequest.setQuantity(requestDto.getQuantity());
+            newRequest.setRequiredDate(requestDto.getRequiredDate());
+            newRequest.setDescription(requestDto.getDescription());
+            newRequest.setLocation(requestDto.getLocation());
+            newRequest.setMediaUrls(mediaUrls);
+            newRequest.setUser(user);
+
+            sponsor_request savedRequest = sponsorRequestService.saveSponsorRequest(newRequest);
+
+            // Prepare response DTO
+            SponsorRequestResponseDTO response = new SponsorRequestResponseDTO();
+            response.setTitle(savedRequest.getTitle());
+            response.setPriority(savedRequest.getPriority());
+            response.setQuantity(savedRequest.getQuantity());
+            response.setRequiredDate(savedRequest.getRequiredDate());
+            response.setDescription(savedRequest.getDescription());
+            response.setMediaUrls(savedRequest.getMediaUrls());
+            response.setLocation(savedRequest.getLocation());
+            response.setUsername(user.getUsername()); // or email/username
+
+            return ResponseEntity.ok(response);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
-
-        String email = authentication.getName(); // Usually the email/username
-        Users user = userService.findByEmail(email); // Make sure this works
-
-        // ... process mediaFiles etc.
-        request.setUser(user);
-        sponsor_request savedRequest = sponsorRequestService.saveSponsorRequest(request);
-        return ResponseEntity.ok(savedRequest);
     }
+
     @GetMapping
     public List<sponsor_request> getAll() {
         return sponsorRequestService.getAll();
