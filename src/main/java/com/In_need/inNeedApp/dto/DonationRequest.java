@@ -54,6 +54,8 @@ public class DonationRequest {
 
     private Boolean isReceived;
 
+    private String organizationUsername;
+
     public String getTimeAgo() {
         Duration duration = Duration.between(createdAt, LocalDateTime.now());
 
