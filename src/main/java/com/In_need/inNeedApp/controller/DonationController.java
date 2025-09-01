@@ -90,27 +90,27 @@ public class DonationController {
         return ResponseEntity.ok(donations);
     }*/
 
-    @GetMapping("/details")
-    public ResponseEntity<List<DonationRequest>> getAllDonations() {
-        List<Donation> donations = donationService.getAllDonations(); // only pending
-        List<DonationRequest> dtoList = donations.stream().map(d -> {
-            DonationRequest dto = new DonationRequest();
-            BeanUtils.copyProperties(d, dto);
-            dto.setStatus(d.getStatus());
-            dto.setIsReceived(d.getIsReceived()); // <- Add this line
-            userRepository.findByEmailIgnoreCase(d.getDonorEmail())
-                    .ifPresent(user -> {
-                        dto.setDonorName(capitalizeWords(user.getUsername()));
-                        dto.setDonorRole(user.getRole());
-                        dto.setProfileImageUrl(user.getProfileImageUrl());
-
-                    });
-
-            return dto;
-        }).collect(Collectors.toList());
-
-        return ResponseEntity.ok(dtoList);
-    }
+//    @GetMapping("/details")
+//    public ResponseEntity<List<DonationRequest>> getAllDonations() {
+//        List<Donation> donations = donationService.getAllDonations(); // only pending
+//        List<DonationRequest> dtoList = donations.stream().map(d -> {
+//            DonationRequest dto = new DonationRequest();
+//            BeanUtils.copyProperties(d, dto);
+//            dto.setStatus(d.getStatus());
+//            dto.setIsReceived(d.getIsReceived()); // <- Add this line
+//            userRepository.findByEmailIgnoreCase(d.getDonorEmail())
+//                    .ifPresent(user -> {
+//                        dto.setDonorName(capitalizeWords(user.getUsername()));
+//                        dto.setDonorRole(user.getRole());
+//                        dto.setProfileImageUrl(user.getProfileImageUrl());
+//
+//                    });
+//
+//            return dto;
+//        }).collect(Collectors.toList());
+//
+//        return ResponseEntity.ok(dtoList);
+//    }
 
     @GetMapping("/donations/details")
     public List<DonationRequest> getDonations() {
@@ -271,5 +271,37 @@ public class DonationController {
         return ResponseEntity.ok(dtoList);
     }
 
+    @GetMapping("/details")
+    public ResponseEntity<List<DonationRequest>> getAllDonations() {
+        List<Donation> donations = donationService.getAllDonations();
+        List<DonationRequest> dtoList = donations.stream().map(d -> {
+            DonationRequest dto = new DonationRequest();
+            BeanUtils.copyProperties(d, dto);
+            dto.setStatus(d.getStatus());
+            dto.setIsReceived(d.getIsReceived());
+
+            // Donor details
+            userRepository.findByEmailIgnoreCase(d.getDonorEmail())
+                    .ifPresent(user -> {
+                        dto.setDonorName(capitalizeWords(user.getUsername()));
+                        dto.setDonorRole(user.getRole());
+                        dto.setProfileImageUrl(user.getProfileImageUrl());
+                    });
+
+            // ✅ NEW: Add organization username via sponsor_request -> user
+            if (d.getSponsorRequest() != null) {
+                sponsor_request request = d.getSponsorRequest();
+
+                // Now get the user (organization) behind that request
+                if (request.getUser() != null) {
+                    dto.setOrganizationUsername(capitalizeWords(request.getUser().getUsername()));
+                }
+            }
+
+            return dto;
+        }).collect(Collectors.toList());
+
+        return ResponseEntity.ok(dtoList);
+    }
 
 }
