@@ -1,8 +1,11 @@
 package com.In_need.inNeedApp.controller;
 
+import com.In_need.inNeedApp.constant.Role;
+import com.In_need.inNeedApp.constant.Status;
 import com.In_need.inNeedApp.dto.*;
 import com.In_need.inNeedApp.model.Location;
 import com.In_need.inNeedApp.model.Users;
+import com.In_need.inNeedApp.model.Verification;
 import com.In_need.inNeedApp.repository.UserRepository;
 import com.In_need.inNeedApp.repository.VerificationRepository;
 import com.In_need.inNeedApp.services.EmailService;
@@ -21,6 +24,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
@@ -39,6 +43,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.security.Principal;
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -126,39 +131,41 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody SignInRequest loginRequest) {
         try {
-            // Normalize email to lowercase
             String email = loginRequest.getEmail().toLowerCase();
 
-            // Check if user exists and is verified
             Optional<Users> optionalUser = userRepository.findByEmailIgnoreCase(email);
             if (optionalUser.isEmpty()) {
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                        .body(Map.of("error", "Invalid email or password"));
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body(Map.of("error", "User not found"));
             }
 
             Users user = optionalUser.get();
-//            if (!user.isVerified()) {
-//                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-//                        .body(Map.of("error", "Please verify your email before logging in"));
-//            }
 
             // Authenticate
             Authentication authentication = authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(email, loginRequest.getPassword())
             );
-
             SecurityContextHolder.getContext().setAuthentication(authentication);
 
             String token = jwtUtil.generateToken(authentication.getName(), authentication.getAuthorities());
 
+            return ResponseEntity.ok(new UserLoginResponse(
+                    token,
+                    user.getRole().name(),
+                    user.getEmail(),
+                    Boolean.TRUE.equals(user.getVerified()),
+                    user.getId(),
+                    user.getUsername()
+            ));
 
-            return ResponseEntity.ok(new UserLoginResponse(token, user.getRole().name(), user.getEmail(), Boolean.TRUE.equals(user.getVerified()), user.getId(), user.getUsername()));
-
-
-
-        } catch (AuthenticationException e) {
+        } catch (BadCredentialsException e) {
+            // Password incorrect
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body(Map.of("error", "Invalid email or password"));
+                    .body(Map.of("error", "Invalid password"));
+        } catch (AuthenticationException e) {
+            // Any other authentication errors
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(Map.of("error", "Authentication failed"));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(Map.of("error", "An unexpected error occurred: " + e.getMessage()));
@@ -289,15 +296,18 @@ public class AuthController {
 
 
 
+    @Transactional
     @PatchMapping("/profile")
     public ResponseEntity<?> updateProfile(@RequestBody UserProfileUpdateRequest request, Principal principal) {
         Users user = userRepository.findByEmailIgnoreCase(principal.getName())
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
+        // Update bio (LOB)
         if (request.getBio() != null) {
             user.setBio(request.getBio());
         }
 
+        // Update location
         if (request.getLocation() != null) {
             user.setLocation(new Location(
                     request.getLocation().getCity(),
@@ -305,9 +315,31 @@ public class AuthController {
             ));
         }
 
+        // Update phone
+        if (request.getPhone() != null && !request.getPhone().isEmpty()) {
+            Verification verification = verificationRepository.findByUserId(user.getId())
+                    .orElse(new Verification());
+
+            verification.setUser(user);
+            verification.setEmail(user.getEmail());
+
+            String digitsOnly = request.getPhone().replaceAll("\\D", "");
+            if (digitsOnly.length() < 10 || digitsOnly.length() > 11) {
+                return ResponseEntity.badRequest().body("Phone number must be 10 or 11 digits");
+            }
+
+            verification.setPhoneNumber(request.getPhone());
+            verification.setSubmittedDate(LocalDateTime.now());
+            verification.setStatus(Status.APPROVED);
+
+            verificationRepository.save(verification);
+        }
+
         userRepository.save(user);
+
         return ResponseEntity.ok(Map.of("message", "Profile updated successfully"));
     }
+
 
     @PostMapping("/upload-profile-image")
     public ResponseEntity<?> uploadProfileImage(

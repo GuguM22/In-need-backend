@@ -25,4 +25,6 @@ public class UserProfileUpdateRequest {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "verification_id")
     private Verification verification;
+
+    private String phone;
 }
