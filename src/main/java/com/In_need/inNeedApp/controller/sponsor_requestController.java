@@ -4,6 +4,7 @@ import com.In_need.inNeedApp.dto.SponsorRequestResponseDTO;
 import com.In_need.inNeedApp.dto.sponsorRequest;
 import com.In_need.inNeedApp.model.Users;
 import com.In_need.inNeedApp.model.sponsor_request;
+import com.In_need.inNeedApp.repository.UserRepository;
 import com.In_need.inNeedApp.services.CustomUserDetailsService;
 import com.In_need.inNeedApp.services.SponsorRequestService;
 import org.springframework.http.HttpStatus;

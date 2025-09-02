@@ -39,6 +39,7 @@ public class Users {
     @Column(name = "profile")
     private String profileImageUrl;
 
+   // private String phoneNumber;
     // Optional: If you have a location object
     @Embedded
     private Location location;
