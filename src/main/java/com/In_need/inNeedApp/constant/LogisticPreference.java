@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 
 public enum LogisticPreference {
     PICK_UP,
+    DROP_OFF,
     DELIVERY;
 
     /**
