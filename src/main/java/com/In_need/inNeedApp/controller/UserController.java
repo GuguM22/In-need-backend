@@ -19,17 +19,22 @@ public class UserController {
     private UserRepository userRepository;
 
     @GetMapping("/me")
-    public ResponseEntity<UserInfoDTO> getCurrentUser(@AuthenticationPrincipal Users user) {
-        if (user == null) {
+    public ResponseEntity<?> getCurrentUser(@AuthenticationPrincipal String email) {
+        if (email == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
 
+        Optional<Users> user = userRepository.findByEmailIgnoreCase(email);
+
+        if(user.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
+        }
         UserInfoDTO dto = new UserInfoDTO(
-                user.getId(),
-                user.getEmail(),
-                user.getUsername(),
-                user.getRole(),
-                user.getVerified() != null && user.getVerified()        );
+                user.get().getId(),
+                user.get().getEmail(),
+                user.get().getUsername(),
+                user.get().getRole(),
+                user.get().getVerified() != null && user.get().getVerified()        );
 
         return ResponseEntity.ok(dto);
     }
