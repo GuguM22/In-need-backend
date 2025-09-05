@@ -2,6 +2,7 @@ package com.In_need.inNeedApp.controller;
 
 import com.In_need.inNeedApp.dto.SponsorRequestResponseDTO;
 import com.In_need.inNeedApp.dto.sponsorRequest;
+import com.In_need.inNeedApp.model.Donation;
 import com.In_need.inNeedApp.model.Users;
 import com.In_need.inNeedApp.model.sponsor_request;
 import com.In_need.inNeedApp.repository.UserRepository;
@@ -213,6 +214,18 @@ public class sponsor_requestController {
         }
 
         List<sponsor_request> requests = sponsorRequestService.getByUser(user);
+
+        // Here we enhance donations with donor profile images
+        for (sponsor_request request : requests) {
+            for (Donation donation : request.getDonations()) {
+                if (donation.getDonorEmail() != null) {
+                    Users donor = userService.findByEmail(donation.getDonorEmail());
+                    if (donor != null && donor.getProfileImageUrl() != null) {
+                        donation.setProfileImageUrl(donor.getProfileImageUrl());
+                    }
+                }
+            }
+        }
 
         return ResponseEntity.ok(requests);
     }
