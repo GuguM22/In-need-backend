@@ -22,21 +22,30 @@ public class Users {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "email", unique = true, nullable = false)
+    @Column(name = "email", unique = false, nullable = false)
     private String email;
 
     @Column(name = "password", nullable = false)
     @JsonIgnore
     private String password;
 
-    @Column(name = "name")
-    private String name;
+    @Column(name = "username")
+    private String username;
 
-    @Column(name = "verification_token")
-    private String verificationToken;
+    @Column(name = "bio")
+    private String bio;
+    @Column(name = "profile")
+    private String profileImageUrl;
 
-    @Column(name = "verified")
-    private boolean verified = false;
+    // Optional: If you have a location object
+    @Embedded
+    private Location location;
+
+//    @Column(name = "verification_token")
+//    private String verificationToken;
+
+   /* @Column(name = "verified")
+    private boolean verified = false; */
 
     @Column(name = "reset_token")
     private String resetToken;
@@ -44,6 +53,9 @@ public class Users {
     @Enumerated(EnumType.STRING)
     @Column(name = "role", nullable = false)
     private  Role role;
+
+    @Column(name = "verified")
+    private Boolean verified = false;
 
     @Override
     public boolean equals(Object o) {
@@ -63,8 +75,8 @@ public class Users {
         return "Users{" +
                 "id=" + id +
                 ", email='" + email + " " +
-        ", name='" + name + " " +
-        ", verified=" + verified +
+        ", name='" + username + " " +
+        ", verified=" + //verified* +
                 ", role=" + role +
                 '}';
     }

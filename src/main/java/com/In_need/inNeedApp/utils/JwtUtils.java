@@ -1,5 +1,6 @@
 package com.In_need.inNeedApp.utils;
 
+
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
@@ -19,7 +20,7 @@ public class JwtUtils {
     private String secret;
 
     public String generateToken(String email, Collection<? extends GrantedAuthority> authorities) {
-        long expirationMs = 86400000; // 1 day
+        long expirationMs = 86400000;
         SecretKey key = Keys.hmacShaKeyFor(secret.getBytes());
 
         return Jwts.builder()
@@ -55,5 +56,19 @@ public class JwtUtils {
         } catch (JwtException | IllegalArgumentException e) {
             return false;
         }
+    }
+
+    // inside JwtUtils
+    public Date extractExpiration(String token) {
+        SecretKey key = Keys.hmacShaKeyFor(secret.getBytes());
+        Claims claims = Jwts.parserBuilder()
+                .setSigningKey(key)
+                .build()
+                .parseClaimsJws(token)
+                .getBody();
+        return claims.getExpiration();
+    }
+    public String getSecret() {
+        return secret;
     }
 }
